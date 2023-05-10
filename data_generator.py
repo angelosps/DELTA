@@ -63,7 +63,7 @@ def example_is_valid(context, questions):
         ) and f"{question['text']}." in context:
             print("Found question of depth > 0 in context, skipping this theory!")
             print(f"CONTEXT: {context}")
-            print(f"QUESTIONS: {questions}")
+            print(f"QUESTION: {question}")
             return False
     return True
 
