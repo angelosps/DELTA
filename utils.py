@@ -237,7 +237,7 @@ def isSubClassOfThing(RHS):
     return False
 
 
-def tbox_axiom_constrain_check(generated_tbox_axiom):
+def tbox_axiom_constrain_check(generated_tbox_axiom, current_tbox):
     """Checks whether a generated TBox Axiom is valid according to the following rules:
     1. Don't allow A and/or A on each side concepts
     2. No tautologies (\Bottom \isSubClassOf Concept)
@@ -257,7 +257,58 @@ def tbox_axiom_constrain_check(generated_tbox_axiom):
     if generated_tbox_axiom.LHS_concept == generated_tbox_axiom.RHS_concept:
         return False
 
+    graph = build_graph(list(current_tbox) + [generated_tbox_axiom])
+
+    if has_cycle(graph):
+        print("Cycle catched!")
+        return False
+
     return True
+
+
+def build_graph(tbox_axioms):
+    graph = {}
+
+    for axiom in tbox_axioms:
+        lhs = axiom.LHS_concept
+        rhs = axiom.RHS_concept
+
+        if lhs not in graph:
+            graph[lhs] = []
+
+        if rhs not in graph:
+            graph[rhs] = []
+
+        graph[lhs].append(rhs)
+
+    return graph
+
+
+def has_cycle_util(graph, node, visited, rec_stack):
+    visited.add(node)
+    rec_stack.add(node)
+
+    for neighbor in graph[node]:
+        if neighbor not in visited:
+            if has_cycle_util(graph, neighbor, visited, rec_stack):
+                return True
+        elif neighbor in rec_stack:
+            return True
+
+    rec_stack.remove(node)
+    return False
+
+
+def has_cycle(graph):
+    visited = set()
+    rec_stack = set()
+
+    for node in list(graph.keys()):  # Use list() to avoid RuntimeError
+        if node not in visited:
+            if has_cycle_util(graph, node, visited, rec_stack):
+                return True
+
+    return False
 
 
 def concept_assertion_constrain_check(
@@ -312,6 +363,7 @@ def inferred_axioms_constrain_check(inferred_instances, max_depth):
     depths_seq_list = list(range(1, max_depth + 1))
 
     if any([d not in proof_depths for d in depths_seq_list]):
+        print(f"Proof depths: {proof_depths}")
         return None
 
     return useful_inferred

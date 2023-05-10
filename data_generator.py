@@ -16,26 +16,20 @@ from question_generation import *
 
 ### Some global data ###
 individual_names = list()
-all_statements_NL = dict()
-context_statements_NL = dict()
 
 TBoxAxiomQuestions = 0
 RoleAssertionQuestions = 0
 ConceptAssertionQuestions = 0
 
 
-def extend_with_all_conjunction_sides(concept, generated_concepts):
+def extend_with_all_conjunction_sides(concept):
     if isinstance(concept, AtomicConcept) and concept.concept_name == "⊤":
         return set()
     if isinstance(concept, JunctionConcept) and concept.relationship == "⊓":
-        LHS_set = extend_with_all_conjunction_sides(
-            concept.lhs_concept, generated_concepts
-        )
-        RHS_set = extend_with_all_conjunction_sides(
-            concept.rhs_concept, generated_concepts
-        )
+        LHS_set = extend_with_all_conjunction_sides(concept.lhs_concept)
+        RHS_set = extend_with_all_conjunction_sides(concept.rhs_concept)
         return LHS_set.union(RHS_set)
-    return generated_concepts.union({concept})
+    return {concept}
 
 
 def handler(signum, frame):
@@ -80,7 +74,7 @@ def handle_abox_assertion_case(
     generated_role_names,
     generated_abox_concepts,
     generated_statements,
-    context_statements_NL,
+    context2NL,
 ):
     generated_abox_assertion = parse_abox_assertion(generated_statement)
     concept_assertion_constraint_satisfied = True
@@ -93,19 +87,18 @@ def handle_abox_assertion_case(
             generated_abox.add(generated_abox_assertion)
             generated_abox_concepts.add(generated_abox_assertion.concept)
             generated_statements.add(generated_statement)
-            context_statements_NL[
-                generated_abox_assertion
-            ] = generated_abox_assertion.nl()
-            generated_abox_concepts = extend_with_all_conjunction_sides(
-                generated_abox_assertion.concept,
-                generated_abox_concepts,
+            context2NL[generated_abox_assertion] = generated_abox_assertion.nl()
+            generated_abox_concepts.update(
+                extend_with_all_conjunction_sides(
+                    generated_abox_assertion.concept,
+                )
             )
             return True
     else:  # RoleAssertion
         generated_abox.add(generated_abox_assertion)
         generated_role_names.add(generated_abox_assertion.RoleName)
         generated_statements.add(generated_statement)
-        context_statements_NL[generated_abox_assertion] = generated_abox_assertion.nl()
+        context2NL[generated_abox_assertion] = generated_abox_assertion.nl()
         return True
 
     return False
@@ -117,7 +110,7 @@ def handle_tbox_axiom_case(
     generated_tbox,
     lhs_pool,
     generated_statements,
-    context_statements_NL,
+    context2NL,
 ):
     generated_tbox_axiom = parse_tbox_axiom(generated_statement)
 
@@ -126,14 +119,16 @@ def handle_tbox_axiom_case(
     else:  # The LHS will be sampled from the lhs_pool #
         generated_tbox_axiom.LHS_concept = choice(tuple(lhs_pool))
 
-    tbox_axiom_constraint_satisfied = tbox_axiom_constrain_check(generated_tbox_axiom)
+    tbox_axiom_constraint_satisfied = tbox_axiom_constrain_check(
+        generated_tbox_axiom, generated_tbox
+    )
 
     if tbox_axiom_constraint_satisfied:
         generated_tbox.add(generated_tbox_axiom)
         generated_statements.add(generated_statement)
-        context_statements_NL[generated_tbox_axiom] = generated_tbox_axiom.nl()
-        lhs_pool = extend_with_all_conjunction_sides(
-            generated_tbox_axiom.RHS_concept, lhs_pool
+        context2NL[generated_tbox_axiom] = generated_tbox_axiom.nl()
+        lhs_pool.update(
+            extend_with_all_conjunction_sides(generated_tbox_axiom.RHS_concept)
         )
         lhs_pool.add(generated_tbox_axiom.RHS_concept)
         return True
@@ -150,7 +145,7 @@ def generate_KB(
     generated_role_names,
     generated_tbox,
     lhs_pool,
-    context_statements_NL,
+    context2NL,
 ):
     for statement_type in statement_types:
         start_symbol = statement_type["start_symbol"]
@@ -180,7 +175,7 @@ def generate_KB(
                         generated_tbox,
                         lhs_pool,
                         generated_statements,
-                        context_statements_NL,
+                        context2NL,
                     ):
                         num_generated_statements += 1
                         num_generation_attempts = 0
@@ -194,7 +189,7 @@ def generate_KB(
                         generated_role_names,
                         generated_abox_concepts,
                         generated_statements,
-                        context_statements_NL,
+                        context2NL,
                     ):
                         num_generated_statements += 1
                         num_generation_attempts = 0
@@ -203,7 +198,7 @@ def generate_KB(
 
 
 def process_ontology_and_inferred_axioms(
-    example_id, generated_abox, generated_tbox, context_statements_NL, max_depth
+    example_id, generated_abox, generated_tbox, context2NL, all2NL, max_depth
 ):
     try:
         # Set up the signal handler
@@ -218,7 +213,9 @@ def process_ontology_and_inferred_axioms(
         # If the code times out, catch the exception and return None
         if str(ex) == "Timed out":
             print("Owlready2 Timed out!")
-        print("Owlready exception!")
+        print(f"Owlready exception: {ex}")
+        print(generated_abox)
+        print(generated_tbox)
         return None, None
 
     owlapi_output = str()
@@ -229,29 +226,23 @@ def process_ontology_and_inferred_axioms(
         preexec_fn=setsid,
     ) as process:
         try:
-            owlapi_output = process.communicate(timeout=4.5)[0]
+            owlapi_output = process.communicate(timeout=5)[0]
         except TimeoutExpired:
             killpg(process.pid, SIGTERM)
-            print("Owlapi timeout!")
+            # print("Owlapi timeout!")
             return None, None
 
     if INCONSISTENCY_MSG in owlapi_output:
-        print("Inconsistent ontology!")
+        # print("Inconsistent ontology!")
         return None, None
-
-    global all_statements_NL
-    all_statements_NL = context_statements_NL.copy()  # Shallow copy!
 
     theory = Theory(
         list(generated_abox),
         list(generated_tbox),
-        list(context_statements_NL.values())
-        + ["All individuals are different from each other."],
+        list(context2NL.values()) + ["All individuals are different from each other."],
     )
 
-    inferred_axioms = get_inferred_axioms_with_explanations(
-        owlapi_output, all_statements_NL
-    )
+    inferred_axioms = get_inferred_axioms_with_explanations(owlapi_output, all2NL)
 
     if inferred_axioms == None:
         print("No inferred axioms!")
@@ -274,7 +265,8 @@ def generate_example_questions(
     useful_inferred,
     max_depth,
     grammar,
-    context_statements_NL,
+    context2NL,
+    all2NL,
 ):
     qID = 2 * (max_depth + 1) + 1
     n_unknown_questions = max_depth + 1
@@ -283,7 +275,7 @@ def generate_example_questions(
         qID,
         n_unknown_questions,
         grammar,
-        all_statements_NL,
+        all2NL,
     )
 
     if unknown_questions == None:
@@ -308,7 +300,7 @@ def generate_example_questions(
         return None
 
     true_questions = make_true_questions(
-        lookup_questions_pool, useful_inferred, max_depth, context_statements_NL
+        lookup_questions_pool, useful_inferred, max_depth, context2NL
     )
     questions.extend(true_questions)
 
@@ -328,7 +320,7 @@ def generate_example_questions(
     if len(example_id_prefix) > 0:
         example_id = f"{example_id_prefix}-{example_id}"
 
-    context = [f"{sentence}." for sentence in context_statements_NL.values()] + [
+    context = [f"{sentence}." for sentence in context2NL.values()] + [
         "All individuals are different from each other."
     ]
 
@@ -359,6 +351,7 @@ def generate_random_example(
     generated_tbox = set()
     lhs_pool = set()
 
+    context2NL = dict()  # maps a concept statement to its NL representation
     generate_KB(
         statement_types,
         grammar,
@@ -368,11 +361,14 @@ def generate_random_example(
         generated_role_names,
         generated_tbox,
         lhs_pool,
-        context_statements_NL,
+        context2NL,
     )
 
+    # Shallow copy! Will contain all KB sentences to NL (context, inferred axioms)
+    all2NL = context2NL.copy()
+
     theory, useful_inferred = process_ontology_and_inferred_axioms(
-        example_id, generated_abox, generated_tbox, context_statements_NL, max_depth
+        example_id, generated_abox, generated_tbox, context2NL, all2NL, max_depth
     )
 
     if theory == None or useful_inferred == None:
@@ -385,12 +381,9 @@ def generate_random_example(
         useful_inferred,
         max_depth,
         grammar,
-        context_statements_NL,
+        context2NL,
+        all2NL,
     )
-
-    if example != None:
-        print(example.english)
-        print(example.logical_forms)
 
     return example
 
@@ -428,13 +421,8 @@ def generate_theory(grammar, config, theory_op_file, num_of_examples, max_depth)
     curr_num_examples = 0
     progress_tracker = tqdm(total=num_of_examples)
     progress_tracker.set_description(desc="Generating Examples...")
-    global all_statements_NL
-    global context_statements_NL
 
     while curr_num_examples < num_of_examples:
-        all_statements_NL.clear()
-        context_statements_NL.clear()
-
         example = generate_random_example(
             curr_num_examples + 1,
             example_id_prefix,

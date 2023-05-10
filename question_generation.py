@@ -301,9 +301,7 @@ def is_unknown(random_unknown_axiom, all_statements_NL):
     return True
 
 
-def generate_unknown_questions(
-    qID, num_of_unknown_questions, grammar, all_statements_NL
-):
+def generate_unknown_questions(qID, num_of_unknown_questions, grammar, all2NL):
     """Generate questions with "Unknown" label.
     Generates a random statement, and if it doesn't appear in any inferred axiom,
     or in the context, then it is valid."""
@@ -324,18 +322,18 @@ def generate_unknown_questions(
             random_unknown_axiom = parse_tbox_axiom(random_unknown_statement)
 
         ## Unknownment Check! ##
-        if is_unknown(random_unknown_axiom, all_statements_NL) == False:
+        if is_unknown(random_unknown_axiom, all2NL) == False:
             tries += 1
             continue
 
         tries = 0
         # valid unknown question
-        UnkAxiom = random_unknown_axiom.nl()
+        random_unknown_axiom_nl = random_unknown_axiom.nl()
         unknown_questions_counter += 1
 
         unk_q_dict = {
             "id": qID,
-            "text": UnkAxiom,
+            "text": random_unknown_axiom_nl,
             "label": "Unknown",
             "depth": 0,
             "meta": {
@@ -346,10 +344,9 @@ def generate_unknown_questions(
 
         qID += 1
         unknown_questions.append(unk_q_dict)
-        all_statements_NL[random_unknown_axiom] = UnkAxiom  # Don't repeat it!
+        all2NL[random_unknown_axiom] = random_unknown_axiom_nl  # Don't repeat it!
 
     if tries > max_tries:
-        # print("Max tries in unknown reached!")
         return None
 
     return unknown_questions
