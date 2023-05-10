@@ -1,0 +1,17 @@
+{
+  "theory": {
+    "num_examples": 100,
+    "min_num_positive_examples": 10,
+    "statement_types_per_example": [
+      {
+        "start_symbol": "ABoxAssertion",
+        "num_statements_range": [4, 8]
+      },
+      {
+        "start_symbol": "TBoxAxiom",
+        "num_statements_range": [3, 8]
+      }
+    ]
+  },
+  "example_id_prefix": "ALCQ-Example"
+}

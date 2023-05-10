@@ -1,0 +1,1 @@
+nohup python3 theory_generator.py --grammar grammars_and_config/ALCQ_grammarsNV/ALCQGrammarL1.txt --config-json grammars_and_config/config/D3_config.json --num-of-examples 1000 --max-depth 3 --op-theory-jsonl NV-L1-D3-1K.jsonl --model-format True --grammar-level 1 &

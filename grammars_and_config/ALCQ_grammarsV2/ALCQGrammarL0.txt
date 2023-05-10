@@ -1,0 +1,20 @@
+ABoxAssertion -> ConceptAssertion | RoleAssertion
+TBoxAxiom -> ConceptInclusion
+ConceptInclusion -> InclusionL0
+InclusionL0 -> ConceptL0 '⊑' ConceptL0 [0.6] | SpecialAxiom [0.4]
+SpecialAxiom -> '+' '⊤' '⊑' '∀' RoleName '.' '(' Concept ')' | '∃' RoleName '.' '(' '+' '⊤' ')' '⊑' Concept
+Concept -> ConceptL0
+ConceptL0 -> ConceptNameOrRestriction
+ConceptNameOrRestriction -> Polarity ConceptName | RestrictionConcept
+RestrictionConcept -> RestrictionD0
+RestrictionD0 -> Restriction RoleName '.' '(' Polarity ConceptName ')' | '∃' RoleName '.' '(' '+' '⊤' ')' | '∀' RoleName '(' '+' '⊥' ')'
+Restriction -> '∀' | '∃' | Symbol Number
+Symbol -> '>' | '>=' | '<' | '<=' | '='
+Number -> '1' | '2' | '3'
+IndividualName -> 'Ioanna' | 'Dimitrios' | 'Eleni' | 'Maria' | 'Manolis' | 'Angelos' | 'Panos' | 'Anna'
+ConceptName -> 'ambitious' | 'confident' | 'creative' | 'determined' | 'enthusiastic' | 'innovative' | 'logical' | 'persevering'
+RoleName -> 'admires' | 'consults' | 'guides' | 'instructs' | 'mentors' | 'supervises' | 'supports'
+RoleAssertion -> RoleName '(' IndividualName ',' IndividualName ')'
+ConceptAssertion -> '(' Concept ')' '(' IndividualName ')'
+Polarity -> '+' | '¬'
+Connective -> '⊓' [0.5] | '⊔' [0.5]

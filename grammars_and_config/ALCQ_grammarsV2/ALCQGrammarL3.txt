@@ -1,0 +1,37 @@
+ABoxAssertion -> ConceptAssertion | RoleAssertion
+TBoxAxiom -> ConceptInclusion
+ConceptInclusion -> InclusionL0 [0.1] | InclusionL1 [0.15] | InclusionL2 [0.15] | InclusionL3 [0.3] | SpecialAxiom [0.3]
+SpecialAxiom -> '+' '⊤' '⊑' '∀' RoleName '.' '(' Concept4SpecialAxiom ')' | '∃' RoleName '.' '(' '+' '⊤' ')' '⊑' Concept
+Concept4SpecialAxiom-> ConceptL0 | ConnectionL1ForRestriction | ConnectionL2ForRestriction | ConnectionL3ForRestriction
+InclusionL0 -> ConceptL0 '⊑' ConceptL0
+InclusionL1 -> ConceptL0 '⊑' ConceptL1 | ConceptL1 '⊑' ConceptL0 | ConceptL1 '⊑' ConceptL1
+InclusionL2 -> ConceptL0 '⊑' ConceptL2 | ConceptL1 '⊑' ConceptL2 | ConceptL2 '⊑' ConceptL1 | ConceptL2 '⊑' ConceptL0
+InclusionL3 -> ConceptL0 '⊑' ConceptL3 | ConceptL1 '⊑' ConceptL3 | ConceptL2 '⊑' ConceptL3 | ConceptL3 '⊑' ConceptL2 | ConceptL3 '⊑' ConceptL1 | ConceptL3 '⊑' ConceptL0 
+Concept -> ConceptL0 [0.4] | ConceptL1 [0.35] | ConceptL2 [0.15] | ConceptL3 [0.1]
+ConceptL0 -> ConceptNameOrRestrictionD0
+ConceptL1 -> ConnectionL1 | Restriction RoleName '.' '(' ConnectionL1ForRestriction ')'
+ConceptL2 -> ConnectionL2 | Restriction RoleName '.' '(' ConnectionL2ForRestriction ')'
+ConceptL3 -> ConnectionL3 | Restriction RoleName '.' '(' ConnectionL3ForRestriction ')'
+ConnectionL1 -> '(' ConceptNameOrRestrictionD0 ')' Connective '(' ConceptNameOrRestrictionD0 ')' | NestedRestrictionConceptL1
+NestedRestrictionConceptL1 -> '(' Polarity ConceptName ')' Connective '(' RestrictionD1 ')'
+ConnectionL1ForRestriction -> '(' Polarity ConceptName ')' Connective '(' Polarity ConceptName ')' | '(' Polarity ConceptName ')' Connective '(' RestrictionD0 ')'
+ConnectionL2 -> '(' ConceptNameOrRestrictionD0 ')' Connective '(' ConnectionL1 ')' | NestedRestrictionConceptL2
+NestedRestrictionConceptL2 -> '(' ConceptNameOrRestrictionD0 ')' Connective '(' NestedRestrictionConceptL1 ')'
+ConnectionL2ForRestriction -> '(' ConceptNameOrRestrictionD0 ')' Connective '(' ConnectionL1ForRestriction ')'
+ConnectionL3 -> '(' ConceptNameOrRestrictionD0 ')' Connective '(' ConnectionL2 ')' | NestedRestrictionConceptL3
+NestedRestrictionConceptL3 -> '(' ConceptNameOrRestrictionD0 ')' Connective '(' NestedRestrictionConceptL2 ')'
+ConnectionL3ForRestriction -> '(' ConceptNameOrRestrictionD0 ')' Connective '(' ConnectionL2ForRestriction ')'
+ConceptNameOrRestrictionD0 -> Polarity ConceptName | RestrictionD0
+ConceptNameOrRestrictionD1 -> Polarity ConceptName | RestrictionD1
+RestrictionD0 -> Restriction RoleName '.' '(' Polarity ConceptName ')' [0.7] | '∃' RoleName '.' '(' '+' '⊤' ')' [0.15] | '∀' RoleName '(' '+' '⊥' ')' [0.15]
+RestrictionD1 -> Restriction RoleName '.' '(' RestrictionD0 ')' 
+Restriction -> '∀' | '∃' | Symbol Number
+Symbol -> '>' | '>=' | '<' | '<=' | '='
+Number -> '1' | '2' | '3'
+IndividualName -> 'Ioanna' | 'Dimitrios' | 'Eleni' | 'Maria' | 'Manolis' | 'Angelos' | 'Panos'
+ConceptName -> 'ambitious' | 'confident' | 'creative' | 'determined' | 'enthusiastic' | 'innovative' | 'logical' | 'persevering'
+RoleName -> 'admires' | 'consults' | 'guides' | 'instructs' | 'leads' | 'mentors' | 'supervises' | 'supports'
+RoleAssertion -> RoleName '(' IndividualName ',' IndividualName ')'
+ConceptAssertion -> '(' Concept ')' '(' IndividualName ')'
+Polarity -> '+' | '¬'
+Connective -> '⊓' [0.5] | '⊔' [0.5]
