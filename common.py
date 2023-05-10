@@ -2,6 +2,8 @@ from abc import ABC
 from nl_utils import pluralize
 import random
 
+INCONSISTENCY_MSG = "INCONSISTENT ONTOLOGY!"
+
 
 class Concept(ABC):
     """Class representing a Concept."""
@@ -438,23 +440,6 @@ class TBoxAxiom:
             )
             return axiom_nl
 
-        # if (
-        #     isinstance(self.LHS_concept, RestrictionConcept)
-        #     and isinstance(self.LHS_concept.concept, AtomicConcept)
-        #     and self.LHS_concept.concept.concept_name == "⊤"
-        # ):
-        #     if isinstance(self.RHS_concept, AtomicConcept):
-        #         axiom_nl = f"Only people that are {pluralize(self.RHS_concept.nl())} can {self.LHS_concept.role_name[:-1]} {lhs_pronoun}"
-        #     elif isinstance(self.RHS_concept, RestrictionConcept):
-        #         axiom_nl = f"Only people that {pluralize(self.RHS_concept.nl())} can {self.LHS_concept.role_name[:-1]} {lhs_pronoun}"
-        #     elif isinstance(self.RHS_concept, JunctionConcept):
-        #         if self.RHS_concept.has_atomic:
-        #             axiom_nl = f"Only people that are {self.RHS_concept.nl(pronoun='they')} can {self.LHS_concept.role_name[:-1]} {lhs_pronoun}"
-        #         else:
-        #             axiom_nl = f"Only people that {pluralize(self.RHS_concept.nl(pronoun='they'))} can {self.LHS_concept.role_name[:-1]} {lhs_pronoun}"
-
-        #     return axiom_nl
-
         # With some probability, choose one of the attribute templates,
         # and if concept conditions met
         choice = random.randrange(0, 3)
@@ -754,16 +739,8 @@ class Example:
     """Class representing a generated example, which constitutes a TheoryAssertionInstance
     and its representations as logical forms in prefix notation and natural language."""
 
-    def __init__(
-        self,
-        id,
-        theory_assertion_instance,
-        logical_forms=None,
-        english=None,
-        for_model=False,
-    ):
+    def __init__(self, id, theory_assertion_instance, logical_forms=None, english=None):
         self.id = id
-        self.for_model = for_model
         self.theory_assertion_instance = theory_assertion_instance
         if logical_forms is not None:
             self.logical_forms = logical_forms
@@ -794,18 +771,9 @@ class Example:
         )
 
     def to_json(self):
-        if not self.for_model:
-            return {
-                "json_class": "Example",
-                "id": self.id,
-                "theory_assertion_instance": self.theory_assertion_instance.to_json(),
-                "logical_forms": self.logical_forms,
-                "english": self.english,
-            }
-        else:
-            return {
-                "id": self.id,
-                "context": self.english,
-                "questions": self.theory_assertion_instance.questions,
-                "context_logical_form": self.logical_forms,
-            }
+        return {
+            "id": self.id,
+            "context": self.english,
+            "questions": self.theory_assertion_instance.questions,
+            "context_logical_form": self.logical_forms,
+        }
