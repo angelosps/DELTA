@@ -388,6 +388,10 @@ def generate_random_example(
         context_statements_NL,
     )
 
+    if example != None:
+        print(example.english)
+        print(example.logical_forms)
+
     return example
 
 

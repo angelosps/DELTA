@@ -264,8 +264,7 @@ def create_ontology(id, ABoxAssertions, TBoxAxioms):
         # We need to state this in OWA #
         individuals = list(onto.individuals())
         individualset = set([str(i).split(".")[1] for i in individuals])
-        # print(f"Theory Individuals: {inds}")
-        # print(f"Owlready Individuals: {individualset}")
+
         if inds != individualset:
             print("DIFFERENT INDIVIDUALS!!!\n\n")
             print(inds)
@@ -277,5 +276,5 @@ def create_ontology(id, ABoxAssertions, TBoxAxioms):
             AllDifferent(individuals)
 
         onto.save(f"./ALCQtesting.owl", "rdfxml")
-        # onto.save(f"./Generated-Ontologies/ALCQ-Ontology-{id}.owl", "rdfxml")
+        onto.save(f"./Generated-Ontologies/ALCQ-Ontology-{id}.owl", "rdfxml")
         onto.destroy(update_relation=True, update_is_a=True)

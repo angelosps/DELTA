@@ -8,7 +8,6 @@ def KB_union_unknown_axiom(axiom):
     # The axiom would be a false question if KB U {Axiom} -> Inconsistent KB
     # Load the current ontology
     onto = get_ontology("./ALCQtesting.owl").load()
-    # print(f"\nAdding axiom: {axiom}", flush=True)
 
     # Add the "unknown" question axiom to it
     with onto:
@@ -29,9 +28,9 @@ def KB_union_unknown_axiom(axiom):
 
             leftInd = Thing(str(leftIndName))
             rightInd = Thing(str(rightIndName))
-            leftInd.role_name.append(rightInd)
+
+            role[leftInd].append(rightInd)
         elif isinstance(axiom, TBoxAxiom):
-            # CLASS INCLUSION #
             special_check, special_type = special_axiom(axiom)
             if special_check:
                 make_special_axiom(onto, axiom, special_type)
@@ -41,9 +40,6 @@ def KB_union_unknown_axiom(axiom):
                 lhs_concept.is_a.append(rhs_concept)
 
         AllDifferent(list(onto.individuals()))
-
-        # individualset = set([str(i).split(".")[1] for i in list(onto.individuals())])
-        # print(f"\nCONSISTENCY Individuals: {individualset}", flush=True)
 
         onto.save(f"./ALCQCC.owl", "rdfxml")
         onto.destroy(update_is_a=True, update_relation=True)
