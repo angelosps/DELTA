@@ -1,8 +1,7 @@
 from re import finditer, DOTALL
 from utils import parse_concept
 from common import *
-
-NOT_SUPPORTED_CLASS = -1
+from global_variables import NOT_SUPPORTED_CLASS
 
 
 def skip_url(text, start_from=0):

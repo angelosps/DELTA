@@ -13,6 +13,7 @@ from common import *
 from nl_2_owl import create_ontology
 from grammar_utils import *
 from question_generation import *
+from global_variables import *
 
 
 def extend_with_all_conjunction_sides(concept):
@@ -530,6 +531,15 @@ def parse_args():
     return parser.parse_args()
 
 
+def extract_role_names(grammar: PCFG):
+    role_names = set()
+    for production in grammar.productions():
+        if production.lhs().symbol() == "RoleName":
+            for role_name in production.rhs():
+                role_names.add(str(role_name))
+    return role_names
+
+
 def run(args):
     with open(args.grammar, "r") as grammar_file, open(
         args.config_json, "r"
@@ -538,6 +548,9 @@ def run(args):
         production_strs = preprocess_pcfg(grammar_file)
         grammar_str = "\n".join(production_strs)
         grammar = PCFG.fromstring(grammar_str)
+
+        GRAMMAR_ROLE_NAMES.clear()
+        GRAMMAR_ROLE_NAMES.update(extract_role_names(grammar))
 
         print(
             f"\nStarting data generation with grammar: '{args.grammar}', number of examples: {args.num_of_examples}, max depth: {args.max_depth}.\n"

@@ -6,6 +6,7 @@ from subprocess import Popen, PIPE, TimeoutExpired
 from grammar_utils import generate_random_statement
 from os import setsid, killpg
 from signal import SIGTERM
+from global_variables import INCONSISTENCY_MSG
 
 
 def make_true_question(question_ID, axiom, depth, explanation, axiom_nl=None):
