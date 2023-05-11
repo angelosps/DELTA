@@ -1,4 +1,3 @@
-from re import search
 from common import (
     AtomicConcept,
     JunctionConcept,
@@ -263,7 +262,7 @@ def is_tautology(axiom):
 def tbox_axiom_constrain_check(generated_tbox_axiom, current_tbox):
     """
     Checks whether a generated TBox Axiom is valid according to the following rules:
-        1. TBox axioms with the same sides, applied also recursively
+        1. TBox axioms with the same sides, applied recursively
         2. Tautologies
     """
 
@@ -472,7 +471,7 @@ def alcq_negate(concept):
                 concept.role_name,
                 alcq_negate(concept.concept),
             )
-        else:  # Do not negate the filler !
+        else:  # Do not negate the filler!
             negated_concept = RestrictionConcept(
                 opposite_restriction(concept.restriction),
                 concept.role_name,

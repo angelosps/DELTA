@@ -3,6 +3,7 @@ from nl_utils import pluralize
 import random
 
 INCONSISTENCY_MSG = "INCONSISTENT ONTOLOGY!"
+INCOHERENCE_MSG = "INCOHERENT ONTOLOGY!"
 
 
 class Concept(ABC):

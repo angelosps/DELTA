@@ -200,7 +200,7 @@ def process_ontology_and_inferred_axioms(
         print(generated_abox)
         print(generated_tbox)
         return None, None
-    # print("Before owlapi")
+
     owlapi_output = str()
     with Popen(
         ["java", "-jar", "./Explainer.jar"],
@@ -212,18 +212,10 @@ def process_ontology_and_inferred_axioms(
             owlapi_output = process.communicate(timeout=3)[0]
         except TimeoutExpired:
             killpg(process.pid, SIGTERM)
-            # print("Owlapi timeout!")
             return None, None
-    # print("After owlapi")
-    if INCONSISTENCY_MSG in owlapi_output:
-        # print("Inconsistent ontology!")
-        return None, None
 
-    if "INCOHERENT ONTOLOGY!" in owlapi_output:
-        # print("INCOHERENT ONTOLOGY!")
+    if INCONSISTENCY_MSG in owlapi_output or INCOHERENCE_MSG in owlapi_output:
         return None, None
-
-    # print(owlapi_output)
 
     theory = Theory(
         list(generated_abox),
