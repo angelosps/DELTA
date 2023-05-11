@@ -6,20 +6,13 @@ from os import setsid, killpg, remove
 from signal import SIGTERM
 from random import choice, randint
 from tqdm.auto import tqdm
-from nltk import Nonterminal, PCFG
+from nltk import PCFG
 from owl_2_nl import get_inferred_axioms_with_explanations
 from utils import *
 from common import *
 from nl_2_owl import create_ontology
 from grammar_utils import *
 from question_generation import *
-
-### Some global data ###
-individual_names = list()
-
-TBoxAxiomQuestions = 0
-RoleAssertionQuestions = 0
-ConceptAssertionQuestions = 0
 
 
 def extend_with_all_conjunction_sides(concept):
@@ -41,10 +34,6 @@ def example_is_valid(context, questions):
         if isinstance(x, ConceptAssertion):
             neg_x = Concept(x.individual, alcq_negate(x.concept))
             if neg_x in context:
-                print(
-                    f"INCONSISTENT ONTOLOGY!\nFound: '{x}', '{neg_x}' both in the same context!"
-                )
-                print(f"CONTEXT: {context}")
                 return False
 
     for question in questions:
@@ -53,17 +42,11 @@ def example_is_valid(context, questions):
             and question["label"] == "True"
             and f"{question['text']}." not in context
         ):
-            print("True lookup question not in the context, skipping this theory!")
-            print(f"CONTEXT: {context}")
-            print(f"QUESTIONS: {questions}")
             return False
         elif (
             question["depth"] >= 1
             or (question["depth"] == 0 and question["label"] != "True")
         ) and f"{question['text']}." in context:
-            print("Found question of depth > 0 in context, skipping this theory!")
-            print(f"CONTEXT: {context}")
-            print(f"QUESTION: {question}")
             return False
     return True
 
@@ -258,6 +241,61 @@ def process_ontology_and_inferred_axioms(
     return theory, useful_inferred_axioms
 
 
+def prepare_pools(theory):
+    concept_assertions = [
+        assertion
+        for assertion in theory.ABoxAssertions
+        if isinstance(assertion, ConceptAssertion)
+    ]
+    lookup_questions_pool = [
+        x
+        for x in (theory.ABoxAssertions + theory.TBoxAxioms)
+        if type(x) in {ConceptAssertion, RoleAssertion, TBoxAxiom}
+    ]
+
+    return concept_assertions, lookup_questions_pool
+
+
+def generate_true_false_questions(
+    lookup_questions_pool,
+    useful_inferred,
+    max_depth,
+    theory,
+    concept_assertions,
+    context2NL,
+):
+    true_questions = make_true_questions(
+        lookup_questions_pool, useful_inferred, max_depth, context2NL
+    )
+    qID = len(true_questions) + 1
+    false_questions = make_false_questions(
+        qID, theory, concept_assertions, useful_inferred, max_depth
+    )
+
+    if false_questions is None:
+        return None
+
+    questions = true_questions + false_questions
+    return questions
+
+
+def format_example_id(example_id, example_id_prefix):
+    example_id = str(example_id)
+    if len(example_id_prefix) > 0:
+        example_id = f"{example_id_prefix}-{example_id}"
+
+    return example_id
+
+
+def create_context(context2NL):
+    context = [f"{sentence}." for sentence in context2NL.values()] + [
+        "All individuals are different from each other."
+    ]
+    random.shuffle(context)
+
+    return context
+
+
 def generate_example_questions(
     example_id,
     example_id_prefix,
@@ -268,63 +306,36 @@ def generate_example_questions(
     context2NL,
     all2NL,
 ):
-    qID = 2 * (max_depth + 1) + 1
-    n_unknown_questions = max_depth + 1
-
-    unknown_questions = generate_unknown_questions(
-        qID,
-        n_unknown_questions,
-        grammar,
-        all2NL,
-    )
-
-    if unknown_questions == None:
-        print("No unknown questions!")
-        return None
-
-    questions = list()
-    concept_assertions = [
-        assertion
-        for assertion in theory.ABoxAssertions
-        if isinstance(assertion, ConceptAssertion)
-    ]
-
-    lookup_questions_pool = [
-        a
-        for a in (theory.ABoxAssertions + theory.TBoxAxioms)
-        if type(a) in {ConceptAssertion, RoleAssertion, TBoxAxiom}
-    ]
-
-    if len(concept_assertions) == 0 or len(lookup_questions_pool) == 0:
+    concept_assertions, lookup_questions_pool = prepare_pools(theory)
+    if not concept_assertions or not lookup_questions_pool:
         print("Lookup questions pool is empty!")
         return None
 
-    true_questions = make_true_questions(
-        lookup_questions_pool, useful_inferred, max_depth, context2NL
+    qID = 2 * (max_depth + 1) + 1
+    n_unknown_questions = max_depth + 1
+    unknown_questions = generate_unknown_questions(
+        qID, n_unknown_questions, grammar, all2NL
     )
-    questions.extend(true_questions)
+    if unknown_questions is None:
+        print("No unknown questions!")
+        return None
 
-    qID = len(questions) + 1
-    false_questions = make_false_questions(
-        qID, theory, concept_assertions, useful_inferred, max_depth
+    questions = generate_true_false_questions(
+        lookup_questions_pool,
+        useful_inferred,
+        max_depth,
+        theory,
+        concept_assertions,
+        context2NL,
     )
-
-    if false_questions == None:
+    if questions is None:
         print("No false questions!")
         return None
 
-    questions.extend(false_questions)
     questions.extend(unknown_questions)
 
-    example_id = str(example_id)
-    if len(example_id_prefix) > 0:
-        example_id = f"{example_id_prefix}-{example_id}"
-
-    context = [f"{sentence}." for sentence in context2NL.values()] + [
-        "All individuals are different from each other."
-    ]
-
-    random.shuffle(context)
+    example_id = format_example_id(example_id, example_id_prefix)
+    context = create_context(context2NL)
 
     example = Example(
         example_id,
@@ -332,7 +343,7 @@ def generate_example_questions(
         english=context,
     )
 
-    if example_is_valid(context, questions) == False:
+    if not example_is_valid(context, questions):
         print("Example is not valid!")
         return None
 
@@ -389,18 +400,22 @@ def generate_random_example(
 
 
 def count_question_types(example):
-    global ConceptAssertionQuestions, TBoxAxiomQuestions, RoleAssertionQuestions
+    concept_assertion_questions = 0
+    role_assertion_questions = 0
+    tbox_axiom_questions = 0
 
     for q in example.theory_assertion_instance.questions:
         if "ConceptAssertion" in q["meta"]["type"]:
-            ConceptAssertionQuestions += 1
+            concept_assertion_questions += 1
         elif "TBoxAxiom" in q["meta"]["type"]:
-            TBoxAxiomQuestions += 1
+            tbox_axiom_questions += 1
         elif "RoleAssertion" in q["meta"]["type"]:
-            RoleAssertionQuestions += 1
+            role_assertion_questions += 1
         else:
             print(f"Unknown type of question found! {q['meta']}")
             assert False
+
+    return concept_assertion_questions, role_assertion_questions, tbox_axiom_questions
 
 
 def generate_theory(grammar, config, theory_op_file, num_of_examples, max_depth):
@@ -415,10 +430,14 @@ def generate_theory(grammar, config, theory_op_file, num_of_examples, max_depth)
     example_id_prefix = config.get("example_id_prefix", "")
 
     # Generate examples for every required type of statement (Start Symbol type)
-    num_true_labels = 0
-    num_false_labels = 0
-    num_unknown_labels = 0
+    num_true_questions = 0
+    num_false_questions = 0
+    num_unknown_questions = 0
     curr_num_examples = 0
+    total_concept_assertion_uestions = 0
+    total_role_assertion_questions = 0
+    total_tbox_axiom_questions = 0
+
     progress_tracker = tqdm(total=num_of_examples)
     progress_tracker.set_description(desc="Generating Examples...")
 
@@ -433,14 +452,21 @@ def generate_theory(grammar, config, theory_op_file, num_of_examples, max_depth)
         if example is not None:
             for q in example.theory_assertion_instance.questions:
                 if q["label"] == "True":
-                    num_true_labels += 1
+                    num_true_questions += 1
                 elif q["label"] == "False":
-                    num_false_labels += 1
+                    num_false_questions += 1
                 else:
-                    num_unknown_labels += 1
+                    num_unknown_questions += 1
 
-            count_question_types(example)
+            (
+                concept_assertion_uestions,
+                role_assertion_questions,
+                tbox_axiom_questions,
+            ) = count_question_types(example)
 
+            total_concept_assertion_uestions += concept_assertion_uestions
+            total_role_assertion_questions += role_assertion_questions
+            total_tbox_axiom_questions += tbox_axiom_questions
             dump(example.to_json(), theory_op_file, ensure_ascii=False)
             theory_op_file.write("\n")
 
@@ -453,12 +479,12 @@ def generate_theory(grammar, config, theory_op_file, num_of_examples, max_depth)
     progress_tracker.close()
 
     print(f"Generated {curr_num_examples} examples.")
-    print(f"  No. of True labels: {num_true_labels}")
-    print(f"  No. of False labels: {num_false_labels}")
-    print(f"  No. of Unknown labels: {num_unknown_labels}")
-    print(f"  No. of ClassAssertion questions: {ConceptAssertionQuestions}")
-    print(f"  No. of RoleAssertion questions: {RoleAssertionQuestions}")
-    print(f"  No. of TBoxAxiom questions: {TBoxAxiomQuestions}")
+    print(f"  No. of True questions: {num_true_questions}")
+    print(f"  No. of False questions: {num_false_questions}")
+    print(f"  No. of Unknown questions: {num_unknown_questions}")
+    print(f"  No. of Class Assertion questions: {total_concept_assertion_uestions}")
+    print(f"  No. of Role Assertion questions: {total_role_assertion_questions}")
+    print(f"  No. of TBox Axiom questions: {total_tbox_axiom_questions}")
 
 
 def parse_args():
@@ -495,10 +521,6 @@ def run(args):
         production_strs = preprocess_pcfg(grammar_file)
         grammar_str = "\n".join(production_strs)
         grammar = PCFG.fromstring(grammar_str)
-        global individual_names
-        individual_names = [
-            i.rhs()[0] for i in grammar.productions(lhs=Nonterminal("IndividualName"))
-        ]
 
         print(
             f"\n\nStarting data generation with grammar: '{args.grammar}', number of examples: {args.num_of_examples}, max depth: {args.max_depth}.\n"

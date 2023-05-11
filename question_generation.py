@@ -1,7 +1,7 @@
 from random import choice
 from common import *
 from utils import alcq_negate, parse_abox_assertion, parse_tbox_axiom
-from K_union_a_consistency import KB_union_unknown_axiom
+from add_ontology_axiom import KB_union_unknown_axiom
 from subprocess import Popen, PIPE, TimeoutExpired
 from grammar_utils import generate_random_statement
 from os import setsid, killpg
