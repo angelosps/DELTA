@@ -356,15 +356,15 @@ def generate_example_questions(
         # print("Example is not valid!")
         return None
 
-    print("EXAMPLE")
-    print(example.logical_forms)
+    # print("EXAMPLE")
+    # print(example.logical_forms)
 
-    print("NL CONTEXT")
-    print(context)
+    # print("NL CONTEXT")
+    # print(context)
 
-    print("QUESTIONS")
-    for q in questions:
-        print(q)
+    # print("QUESTIONS")
+    # for q in questions:
+    #     print(q)
     return example
 
 
