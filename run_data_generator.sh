@@ -2,7 +2,6 @@
 
 config_dir="grammars_and_config/config"
 num_examples=1000
-model_format=True
 data_dir="DATA"
 
 # Create the data directory if it doesn't exist
@@ -21,8 +20,8 @@ for depth in 0 1; do
       config_file="${config_dir}/D${depth}_config.json"
       output_file="${depth_dir}/V${vocab}-L${level}-D${depth}-1K.jsonl"
 
-      echo "Running theory_generator.py with grammar ${grammar_file} and depth ${depth}"
-      python3 theory_generator.py --grammar "${grammar_file}" --config-json "${config_file}" --num-of-examples "${num_examples}" --max-depth "${depth}" --op-theory-jsonl "${output_file}" --model-format "${model_format}" --grammar-level "${level}"
+      echo "Running data_generator.py with grammar ${grammar_file} and depth ${depth}"
+      python3 data_generator.py --grammar "${grammar_file}" --config-json "${config_file}" --num-of-examples "${num_examples}" --max-depth "${depth}" --output-jsonl "${output_file}"
     done
   done
 done

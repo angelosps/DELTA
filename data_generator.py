@@ -210,7 +210,7 @@ def process_ontology_and_inferred_axioms(
         preexec_fn=setsid,
     ) as process:
         try:
-            owlapi_output = process.communicate(timeout=3)[0]
+            owlapi_output = process.communicate(timeout=4.5)[0]
         except TimeoutExpired:
             killpg(process.pid, SIGTERM)
             return None, None
@@ -235,7 +235,7 @@ def process_ontology_and_inferred_axioms(
 
     if useful_inferred_axioms == None:  # no inferred axiom reached the max depth
         # print("No useful inferred!")
-        return None, None
+        return theory, None
 
     return theory, useful_inferred_axioms
 
@@ -400,7 +400,7 @@ def generate_random_example(
         example_id, generated_abox, generated_tbox, context2NL, all2NL, max_depth
     )
 
-    if theory == None or useful_inferred == None:
+    if theory == None or (useful_inferred == None and max_depth > 0):
         return None
 
     example = generate_example_questions(
@@ -430,8 +430,7 @@ def count_question_types(example):
         elif "RoleAssertion" in q["meta"]["type"]:
             role_assertion_questions += 1
         else:
-            print(f"Unknown type of question found! {q['meta']}")
-            assert False
+            raise ValueError(f"Unknown type of question found: {q['meta']}")
 
     return concept_assertion_questions, role_assertion_questions, tbox_axiom_questions
 

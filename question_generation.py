@@ -70,6 +70,9 @@ def make_true_questions(lookup_pool, inferred_axioms, max_depth, context2NL):
     )
     questions.append(lookup_true_question)
 
+    if max_depth == 0:
+        return questions
+
     # Map inferred axioms according to (Depth, Type)
     mapped_axioms = defaultdict(list)
     for ia in inferred_axioms:
@@ -207,6 +210,10 @@ def make_false_questions(qID, theory, concept_assertions, inferred_axioms, max_d
         negated_concept, false_lookup_question.individual
     )
     questions = [make_false_question(qID, false_lookup_question, 0, [])]
+
+    if max_depth == 0:
+        return questions
+
     qID += 1
 
     # Map inferred axioms according to (Depth, Type)

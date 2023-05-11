@@ -311,7 +311,7 @@ def is_valid_axiom(axiom, depth, max_depth):
     """
     Check if an axiom is valid to be used as question.
     """
-    if isinstance(axiom, TBoxAxiom) and axiom.LHS_concept == axiom.RHS_concept:
+    if isinstance(axiom, TBoxAxiom) and (axiom.LHS_concept == axiom.RHS_concept):
         return False
 
     if is_tautology(axiom):
