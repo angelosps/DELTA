@@ -260,7 +260,7 @@ def tbox_axiom_constrain_check(generated_tbox_axiom, current_tbox):
     graph = build_graph(list(current_tbox) + [generated_tbox_axiom])
 
     if has_cycle(graph):
-        print("Cycle catched!")
+        # print("Cycle catched!")
         return False
 
     return True
@@ -324,7 +324,6 @@ def concept_assertion_constrain_check(
         ConceptAssertion(negated_concept, generated_abox_assertion.individual)
         in generated_abox_assertions
     ):
-        print("Negation of the concept is in context!")
         return False
 
     return True
@@ -363,7 +362,7 @@ def inferred_axioms_constrain_check(inferred_instances, max_depth):
     depths_seq_list = list(range(1, max_depth + 1))
 
     if any([d not in proof_depths for d in depths_seq_list]):
-        print(f"Proof depths: {proof_depths}")
+        # print(f"Proof depths: {proof_depths}")
         return None
 
     return useful_inferred

@@ -8,97 +8,91 @@ from os import setsid, killpg
 from signal import SIGTERM
 
 
-def make_true_questions(lookup_pool, inferred_axioms, max_depth, context_statements_NL):
-    """Given the inferred axioms, pick one axiom from each depth [0, max_depth]
-    as a true question and its negation as a false question."""
+def make_true_question(question_ID, axiom, depth, explanation, axiom_nl=None):
+    """Helper function to create a true question."""
+    true_question_dict = {
+        "id": question_ID,
+        "text": axiom_nl if axiom_nl is not None else axiom.nl(),
+        "label": "True",
+        "depth": depth,
+        "explanation": explanation,
+        "meta": {"DL": str(axiom), "type": str(type(axiom))},
+    }
 
-    def make_true_question(qID, axiom, depth, expl):
-        true_question_dict = {
-            "id": qID,
-            "text": axiom.nl(),
-            "label": "True",
-            "depth": depth,
-            "explanation": expl,
-            "meta": {"DL": str(axiom), "type": str(type(axiom))},
-        }
+    return true_question_dict
 
-        return true_question_dict
 
-    # Initially, make the True Questions of Depth 0 (Lookup True Question)
+def select_assertion(mapped_axioms, keys, concept_bias=0.5):
+    """Helper function to select an assertion from mapped axioms."""
+    for key in keys:
+        if key in mapped_axioms:
+            if (
+                isinstance(key, tuple)
+                and key[1] == ConceptAssertion
+                and random.random() > concept_bias
+            ):
+                # Check if a TBoxAxiom is available
+                tbox_key = (key[0], TBoxAxiom)
+                if tbox_key in mapped_axioms:
+                    continue  # Skip to the TBoxAxiom
+                # If no TBoxAxiom available, don't skip the ConceptAssertion
+
+            selected_assertion = choice(mapped_axioms[key])
+            mapped_axioms[key].remove(selected_assertion)
+
+            if len(mapped_axioms[key]) == 0:
+                _ = mapped_axioms.pop(key)
+
+            return selected_assertion
+
+    return None
+
+
+from collections import defaultdict
+
+
+def make_true_questions(lookup_pool, inferred_axioms, max_depth, context2NL):
     qID = 1
     questions = list()
 
+    # Create a lookup true question
     random_true_question = choice(lookup_pool)
-    random_true_question_NL = context_statements_NL[random_true_question]
+    # Get it's NL representation from the dict of NL
+    random_true_question_NL = context2NL[random_true_question]
 
-    lookup_true_question = {
-        "id": qID,
-        "text": random_true_question_NL,
-        "label": "True",
-        "depth": 0,
-        "explanation": [],
-        "meta": {
-            "DL": str(random_true_question),
-            "type": str(type(random_true_question)),
-        },
-    }
-
-    qID += 1
+    lookup_true_question = make_true_question(
+        question_ID=qID,
+        axiom=random_true_question,
+        depth=0,
+        explanation=[],
+        axiom_nl=random_true_question_NL,
+    )
     questions.append(lookup_true_question)
 
-    ### Map inferred axioms according to (Depth, Type) ##
-    mapped_axioms = dict()
+    # Map inferred axioms according to (Depth, Type)
+    mapped_axioms = defaultdict(list)
     for ia in inferred_axioms:
-        key = (ia["depth"], type(ia["axiom"]))
-        if not key in mapped_axioms:
-            mapped_axioms[key] = list()
-        mapped_axioms[key].append(ia)
+        mapped_axioms[(ia["depth"], type(ia["axiom"]))].append(ia)
 
+    # Create questions for each depth
     for depth in list(range(1, max_depth + 1)):
-        # Pick either Concept or Role Assertion
-        concept_key = (depth, ConceptAssertion)
-        role_key = (depth, RoleAssertion)
-        tbox_key = (depth, TBoxAxiom)
+        # Prioritize Role Assertions
+        true_question = select_assertion(
+            mapped_axioms,
+            [(depth, RoleAssertion), (depth, ConceptAssertion), (depth, TBoxAxiom)],
+        )
 
-        if role_key in mapped_axioms:  # Prioritize Role Assertions
-            true_question = choice(mapped_axioms[role_key])
-            mapped_axioms[role_key].remove(true_question)
+        # No true questions found for this depth
+        if true_question is None:
+            print("IMPOSSIBLEE ")
+            return []
 
-            if len(mapped_axioms[role_key]) == 0:
-                _ = mapped_axioms.pop(role_key)
-        # With probability prioritize Concept Assertions or TBox Axioms
-        elif choice([0, 1]):
-            if concept_key in mapped_axioms:  # Concept Assertions
-                true_question = choice(mapped_axioms[concept_key])
-                mapped_axioms[concept_key].remove(true_question)
-                if len(mapped_axioms[concept_key]) == 0:
-                    _ = mapped_axioms.pop(concept_key)
-            elif tbox_key in mapped_axioms:  # Finally TBox Axioms
-                true_question = choice(mapped_axioms[tbox_key])
-                mapped_axioms[tbox_key].remove(true_question)
-                if len(mapped_axioms[tbox_key]) == 0:
-                    _ = mapped_axioms.pop(tbox_key)
-            else:  # True questions did not reach the desired target depth
-                return None
-        else:
-            if tbox_key in mapped_axioms:  # TBox Axioms
-                true_question = choice(mapped_axioms[tbox_key])
-                mapped_axioms[tbox_key].remove(true_question)
-                if len(mapped_axioms[tbox_key]) == 0:
-                    _ = mapped_axioms.pop(tbox_key)
-            elif concept_key in mapped_axioms:  # Finally Concept Assertions
-                true_question = choice(mapped_axioms[concept_key])
-                mapped_axioms[concept_key].remove(true_question)
-                if len(mapped_axioms[concept_key]) == 0:
-                    _ = mapped_axioms.pop(concept_key)
-            else:  # True questions did not reach the desired target depth
-                return None
-
+        # Create a question for the selected assertion
         true_question = make_true_question(
             qID,
             true_question["axiom"],
             true_question["depth"],
-            [e.__repr__() for e in true_question["explanation"]],
+            [str(e) for e in true_question["explanation"]],
         )
         questions.append(true_question)
         qID += 1
@@ -188,7 +182,7 @@ def get_subclass_false_questions(theory, inferred_axioms):
 
 def make_false_questions(qID, theory, concept_assertions, inferred_axioms, max_depth):
     def make_false_question(qID, axiom, depth, expl):
-        false_question_dict = {
+        return {
             "id": qID,
             "text": axiom.nl(),
             "label": "False",
@@ -200,63 +194,58 @@ def make_false_questions(qID, theory, concept_assertions, inferred_axioms, max_d
             },
         }
 
-        return false_question_dict
+    def choose_and_remove(list):
+        chosen_element = choice(list)
+        list.remove(chosen_element)
+        return chosen_element
 
-    questions = list()
-
-    ###### MAKE THE FALSE LOOKUP QUESTION ########
-    random_false_question = choice(concept_assertions)
-
-    individual = random_false_question.individual
-    negated_concept = alcq_negate(random_false_question.concept)
-    random_false_question = ConceptAssertion(negated_concept, individual)
-
-    random_false_question = make_false_question(qID, random_false_question, 0, [])
-
+    # Create false lookup question
+    false_lookup_question = choice(concept_assertions)
+    negated_concept = alcq_negate(false_lookup_question.concept)
+    false_lookup_question = ConceptAssertion(
+        negated_concept, false_lookup_question.individual
+    )
+    questions = [make_false_question(qID, false_lookup_question, 0, [])]
     qID += 1
-    questions.append(random_false_question)
-    ##############################################
 
-    ### Map inferred axioms according to (Depth, Type) ##
-    mapped_axioms = dict()
+    # Map inferred axioms according to (Depth, Type)
+    mapped_axioms = defaultdict(list)
     for ia in inferred_axioms:
-        key = (ia["depth"], type(ia["axiom"]))
-        if not key in mapped_axioms:
-            mapped_axioms[key] = list()
-        mapped_axioms[key].append(ia)
+        mapped_axioms[(ia["depth"], type(ia["axiom"]))].append(ia)
 
-    ## Make False Questions for each depth ##
+    # Get false questions for TBox axioms
     tbox_false_questions = get_subclass_false_questions(theory, inferred_axioms)
 
-    for depth in list(range(1, max_depth + 1)):
-        if depth in tbox_false_questions:  # Prioritize TBox False Questions
-            false_question = choice(tbox_false_questions[depth])
-            tbox_false_questions[depth].remove(false_question)
-            if len(tbox_false_questions[depth]) == 0:
-                _ = tbox_false_questions.pop(depth)
+    # Make False Questions for each depth
+    for depth in range(1, max_depth + 1):
+        if depth in tbox_false_questions:
+            false_question = choose_and_remove(tbox_false_questions[depth])
+            if not tbox_false_questions[depth]:
+                del tbox_false_questions[depth]
         else:
-            concept_key = (depth, ConceptAssertion)
-            if concept_key in mapped_axioms:
-                false_question = choice(mapped_axioms[concept_key])
-                mapped_axioms[concept_key].remove(false_question)
-                if len(mapped_axioms[concept_key]) == 0:
-                    _ = mapped_axioms.pop(concept_key)
-                negated_concept = alcq_negate(
-                    false_question["axiom"].concept
-                )  # Negate it
-                individual = false_question["axiom"].individual
-                false_question["axiom"] = ConceptAssertion(negated_concept, individual)
-            else:  # False questions did not reach the desired target depth
-                return None
+            if (depth, ConceptAssertion) not in mapped_axioms:
+                return []
+            false_question = choose_and_remove(mapped_axioms[(depth, ConceptAssertion)])
+            if not mapped_axioms[(depth, ConceptAssertion)]:
+                del mapped_axioms[(depth, ConceptAssertion)]
+
+            negated_concept = alcq_negate(false_question["axiom"].concept)
+            false_question["axiom"] = ConceptAssertion(
+                negated_concept, false_question["axiom"].individual
+            )
+
+        if false_question is None:
+            return []
 
         false_question = make_false_question(
             qID,
             false_question["axiom"],
             false_question["depth"],
-            [e.__repr__() for e in false_question["explanation"]],
+            [str(e) for e in false_question["explanation"]],
         )
         questions.append(false_question)
         qID += 1
+
     return questions
 
 

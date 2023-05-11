@@ -200,7 +200,7 @@ def process_ontology_and_inferred_axioms(
         print(generated_abox)
         print(generated_tbox)
         return None, None
-
+    # print("Before owlapi")
     owlapi_output = str()
     with Popen(
         ["java", "-jar", "./Explainer.jar"],
@@ -209,14 +209,18 @@ def process_ontology_and_inferred_axioms(
         preexec_fn=setsid,
     ) as process:
         try:
-            owlapi_output = process.communicate(timeout=5)[0]
+            owlapi_output = process.communicate(timeout=3)[0]
         except TimeoutExpired:
             killpg(process.pid, SIGTERM)
             # print("Owlapi timeout!")
             return None, None
-
+    # print("After owlapi")
     if INCONSISTENCY_MSG in owlapi_output:
         # print("Inconsistent ontology!")
+        return None, None
+
+    if "INCOHERENT ONTOLOGY!" in owlapi_output:
+        print("INCOHERENT ONTOLOGY!")
         return None, None
 
     theory = Theory(
@@ -228,14 +232,14 @@ def process_ontology_and_inferred_axioms(
     inferred_axioms = get_inferred_axioms_with_explanations(owlapi_output, all2NL)
 
     if inferred_axioms == None:
-        print("No inferred axioms!")
+        # print("No inferred axioms!")
         return None, None
 
     # Keep only useful inferred axiom instances from all that owlapi has produced
     useful_inferred_axioms = inferred_axioms_constrain_check(inferred_axioms, max_depth)
 
     if useful_inferred_axioms == None:  # no inferred axiom reached the max depth
-        print("No useful inferred!")
+        # print("No useful inferred!")
         return None, None
 
     return theory, useful_inferred_axioms
@@ -267,12 +271,17 @@ def generate_true_false_questions(
     true_questions = make_true_questions(
         lookup_questions_pool, useful_inferred, max_depth, context2NL
     )
+    if not len(true_questions):
+        print("No true questions!\n\n")
+        return None
+
     qID = len(true_questions) + 1
     false_questions = make_false_questions(
         qID, theory, concept_assertions, useful_inferred, max_depth
     )
 
-    if false_questions is None:
+    if not len(false_questions):
+        # print("No false questions!")
         return None
 
     questions = true_questions + false_questions
@@ -307,17 +316,22 @@ def generate_example_questions(
     all2NL,
 ):
     concept_assertions, lookup_questions_pool = prepare_pools(theory)
-    if not concept_assertions or not lookup_questions_pool:
-        print("Lookup questions pool is empty!")
+    if not concept_assertions:
+        # print("concept_assertions pool is empty!")
+        # print(theory.ABoxAssertions)
+        # print(theory.TBoxAxioms)
         return None
 
+    if not lookup_questions_pool:
+        # print("lookup_questions_pool pool is empty!")
+        return None
     qID = 2 * (max_depth + 1) + 1
     n_unknown_questions = max_depth + 1
     unknown_questions = generate_unknown_questions(
         qID, n_unknown_questions, grammar, all2NL
     )
     if unknown_questions is None:
-        print("No unknown questions!")
+        # print("No unknown questions!")
         return None
 
     questions = generate_true_false_questions(
@@ -329,7 +343,7 @@ def generate_example_questions(
         context2NL,
     )
     if questions is None:
-        print("No false questions!")
+        # print("No false questions!")
         return None
 
     questions.extend(unknown_questions)
@@ -344,9 +358,18 @@ def generate_example_questions(
     )
 
     if not example_is_valid(context, questions):
-        print("Example is not valid!")
+        # print("Example is not valid!")
         return None
 
+    # print("EXAMPLE")
+    # print(example.logical_forms)
+
+    # print("NL CONTEXT")
+    # print(context)
+
+    # print("QUESTIONS")
+    # for q in questions:
+    #     print(q)
     return example
 
 

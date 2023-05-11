@@ -64,9 +64,15 @@ def decode_owl_axiom(axiom_text):
     axiom_text = axiom_text.replace("Nothing", "⊥")
 
     # Atomic Concept from OWLAPI (i.e., "nice", "white")
-    if len(axiom_text.split()) == 1:
+    splitted_axiom_text = axiom_text.split()
+    if len(splitted_axiom_text) == 1:
         return AtomicConcept("+", axiom_text)
-
+    if (
+        len(splitted_axiom_text) == 3
+        and "+" in splitted_axiom_text
+        and "¬" in splitted_axiom_text
+    ):
+        return AtomicConcept("+", axiom_text)
     concept = parse_concept(axiom_text)
     return concept
 

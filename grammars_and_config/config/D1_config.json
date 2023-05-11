@@ -5,11 +5,11 @@
     "statement_types_per_example": [
       {
         "start_symbol": "ABoxAssertion",
-        "num_statements_range": [2, 5]
+        "num_statements_range": [2, 8]
       },
       {
         "start_symbol": "TBoxAxiom",
-        "num_statements_range": [2, 5]
+        "num_statements_range": [2, 6]
       }
     ]
   },

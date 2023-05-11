@@ -1,1 +1,1 @@
-python3 data_generator.py --grammar grammars_and_config/ALCQ_grammarsV1/ALCQGrammarL1.txt --config-json grammars_and_config/config/D0_config.json --num-of-examples 10 --max-depth 3 --output-jsonl data.jsonl
+python3 data_generator.py --grammar grammars_and_config/ALCQ_grammarsV1/ALCQGrammarL1.txt --config-json grammars_and_config/config/D3_config.json --num-of-examples 10 --max-depth 3 --output-jsonl data.jsonl
