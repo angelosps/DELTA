@@ -220,7 +220,7 @@ def process_ontology_and_inferred_axioms(
         return None, None
 
     if "INCOHERENT ONTOLOGY!" in owlapi_output:
-        print("INCOHERENT ONTOLOGY!")
+        # print("INCOHERENT ONTOLOGY!")
         return None, None
 
     # print(owlapi_output)

@@ -11,10 +11,15 @@ from common import (
 
 def parse_abox_assertion(text):
     """Parses text into an ABox Assertion (Concept / Role Assertion).
-    E.g.:
-        + blue ( Bob )
-        ( - red and + white ) ( Dave )
-        likes ( Bob , Fiona ) // Role Assertion
+
+    Args:
+        text (str): Text representing an ABox assertion.
+
+    Returns:
+        ConceptAssertion or RoleAssertion: Parsed ABox assertion.
+
+    Raises:
+        ValueError: If the text is None.
     """
 
     if text is None:
@@ -22,19 +27,27 @@ def parse_abox_assertion(text):
 
     text = text.split()
 
-    if len(text) == 6:  # RoleAssertion
-        RoleName = text[0]
-        IndividualName1 = text[2]
-        IndividualName2 = text[4]
-        return RoleAssertion(RoleName, IndividualName1, IndividualName2)
-    else:  # ConceptAssertion
-        # remove the outer parentheses
-        concept = parse_concept(" ".join(text[1:-4]))
-        IndividualName = text[-2]
-        return ConceptAssertion(concept, IndividualName)
+    if len(text) == 6:  # Role Assertion
+        role_name = text[0]
+        individual_name1 = text[2]
+        individual_name2 = text[4]
+        return RoleAssertion(role_name, individual_name1, individual_name2)
+    else:  # Concept Assertion
+        concept = parse_concept(" ".join(text[1:-4]))  # remove the outer parentheses
+        individual_name = text[-2]
+        return ConceptAssertion(concept, individual_name)
 
 
 def is_junction_concept(text, connective):
+    """Checks if the text represents a junction concept.
+
+    Args:
+        text (str): Text that may representing a junction concept.
+        connective (str): Junction connective.
+
+    Returns:
+        int: Index of the connective if the text is a junction concept, -1 otherwise.
+    """
     connective_idx = text.find(connective)
     if connective_idx == -1:
         return -1
@@ -171,23 +184,18 @@ def parse_concept(text):
 
 def parse_tbox_axiom(statement_txt):
     """
-    Parses text into a TBox Axiom (Subsumption/Equivalence).
+    Parses text into a TBox Axiom (Subsumption / Equivalence).
     E.g.:
         + male ⊑ + person
     """
-    lhs_txt = str()
-    rhs_txt = str()
-    reached_rel = False
-
-    for x in statement_txt:
-        if x == "⊑" or x == "≡":
-            relation = x
-            reached_rel = True
-            continue
-        if not reached_rel:
-            lhs_txt += x
-        else:
-            rhs_txt += x
+    if "⊑" in statement_txt:
+        lhs_txt, rhs_txt = statement_txt.split("⊑", 1)
+        relation = "⊑"
+    elif "≡" in statement_txt:
+        lhs_txt, rhs_txt = statement_txt.split("≡", 1)
+        relation = "≡"
+    else:
+        raise ValueError("Invalid TBox Axiom!")
 
     lhs = parse_concept(lhs_txt.strip())
     rhs = parse_concept(rhs_txt.strip())
@@ -225,23 +233,38 @@ def contains_same_sides(concept):
         return lhs_result or rhs_result
 
 
-def is_tautology(LHS):
-    if isinstance(LHS, AtomicConcept):
-        return LHS.concept_name == "⊥"
-    return False
+def is_tautology(axiom):
+    """Checks if a given axiom is a tautology:
+            1. ( + ⊤ ) ( individual )
+            2. ( + ⊥ ) ⊑ RHS
+            3. LHS ⊑ ( + ⊤ )
+    Args:
+        axiom (str): text representing an axiom
 
-
-def isSubClassOfThing(RHS):
-    if isinstance(RHS, AtomicConcept):
-        return RHS.concept_name == "⊤"
+    Returns:
+        bool: True if and only if the axiom is a tautology
+    """
+    if isinstance(axiom, ConceptAssertion):
+        return axiom.concept == "⊤"
+    elif isinstance(axiom, TBoxAxiom):
+        if (
+            isinstance(axiom.LHS_concept, AtomicConcept)
+            and axiom.LHS_concept.concept_name == "⊥"
+        ):
+            return True
+        elif (
+            isinstance(axiom.RHS_concept, AtomicConcept)
+            and axiom.RHS_concept.concept_name == "⊤"
+        ):
+            return True
     return False
 
 
 def tbox_axiom_constrain_check(generated_tbox_axiom, current_tbox):
-    """Checks whether a generated TBox Axiom is valid according to the following rules:
-    1. Don't allow A and/or A on each side concepts
-    2. No tautologies (\Bottom \isSubClassOf Concept)
-    3. Don't allow A \isSubClassOf A
+    """
+    Checks whether a generated TBox Axiom is valid according to the following rules:
+        1. TBox axioms with the same sides, applied also recursively
+        2. Tautologies
     """
 
     lhs = generated_tbox_axiom.LHS_concept
@@ -250,7 +273,7 @@ def tbox_axiom_constrain_check(generated_tbox_axiom, current_tbox):
     if contains_same_sides(lhs) or contains_same_sides(rhs):
         return False
 
-    if is_tautology(lhs):
+    if isinstance(lhs, AtomicConcept) and lhs.concept_name == "⊥":
         return False
 
     # TBox Axiom with LHS Concept = RHS Concept is not useful
@@ -260,9 +283,7 @@ def tbox_axiom_constrain_check(generated_tbox_axiom, current_tbox):
     graph = build_graph(list(current_tbox) + [generated_tbox_axiom])
 
     if has_cycle(graph):
-        # print("Cycle catched!")
         return False
-
     return True
 
 
@@ -303,7 +324,7 @@ def has_cycle(graph):
     visited = set()
     rec_stack = set()
 
-    for node in list(graph.keys()):  # Use list() to avoid RuntimeError
+    for node in list(graph.keys()):
         if node not in visited:
             if has_cycle_util(graph, node, visited, rec_stack):
                 return True
@@ -314,134 +335,125 @@ def has_cycle(graph):
 def concept_assertion_constrain_check(
     generated_abox_assertion, generated_abox_assertions
 ):
-    """Checks whether a generated A Box assertion is valid according to some rules."""
+    """
+    Checks whether a generated ABox assertion is valid according to some rules.
+    """
+    concept = generated_abox_assertion.concept
+    individual = generated_abox_assertion.individual
 
-    if contains_same_sides(generated_abox_assertion.concept):
+    if contains_same_sides(concept):
         return False
 
-    negated_concept = alcq_negate(generated_abox_assertion.concept)
-    if (
-        ConceptAssertion(negated_concept, generated_abox_assertion.individual)
-        in generated_abox_assertions
-    ):
+    # If the negated concept is in the generated ABox
+    if ConceptAssertion(alcq_negate(concept), individual) in generated_abox_assertions:
         return False
 
     return True
 
 
+def is_valid_axiom(axiom, depth, max_depth):
+    """
+    Check if an axiom is valid to be used as question.
+    """
+    if isinstance(axiom, TBoxAxiom) and axiom.LHS_concept == axiom.RHS_concept:
+        return False
+
+    if is_tautology(axiom):
+        return False
+
+    if depth <= 0 or depth > max_depth:
+        return False
+
+    return True
+
+
+def missing_depths(proof_depths_found, max_depth):
+    """
+    Check if there are any missing depths in the proof
+    """
+    expected_depths = set(range(1, max_depth + 1))
+    return any([depth not in proof_depths_found for depth in expected_depths])
+
+
 def inferred_axioms_constrain_check(inferred_instances, max_depth):
-    """Given the inferred axioms in tuples of (axiom, depth, explanation),
+    """
+    Given the inferred axioms in tuples of (axiom, depth, explanation),
     returns which of them are valid to be used as questions.
-    i.e., they have to be within the max depth, do not contain Thing or Nothing, ...
-    returns None if no axiom reached the desired max depth"""
+    """
 
-    useful_inferred = list()
+    useful_inferred = []
     proof_depths = set()
-    maxd = -1
-    for axiom, depth, expl in inferred_instances:
-        if isinstance(axiom, TBoxAxiom) and axiom.LHS_concept == axiom.RHS_concept:
+
+    for axiom, depth, explanation in inferred_instances:
+        if not is_valid_axiom(axiom, depth, max_depth):
             continue
 
-        # Don't take tautologies as questions
-        if search(r"(?:[^a-zA-Z]|^)thing(?:[^a-zA-Z]|$)", axiom.nl()) != None:
-            continue
+        axiom_dictionary = {
+            "axiom": axiom,
+            "depth": depth,
+            "explanation": explanation,
+        }
+        proof_depths.add(depth)
+        useful_inferred.append(axiom_dictionary)
 
-        maxd = max(maxd, depth)
-        if (
-            (depth > 0)
-            and (depth <= max_depth)
-            and (axiom.nl().lower().find("is thing") == -1)
-        ):
-            dic = {"axiom": axiom, "depth": depth, "explanation": expl}
-            proof_depths.add(depth)
-            useful_inferred.append(dic)
-
-    if useful_inferred == None:
-        return None
-
-    depths_seq_list = list(range(1, max_depth + 1))
-
-    if any([d not in proof_depths for d in depths_seq_list]):
-        # print(f"Proof depths: {proof_depths}")
+    if not useful_inferred or missing_depths(proof_depths, max_depth):
         return None
 
     return useful_inferred
 
 
-def chaining_question(expl):
-    def dfs(e, edges, vis):
-        vis[e] = 1
-        neighbors = edges[e]
-        for n in neighbors:
-            if vis[n] == 0:
-                dfs(n, edges, vis)
-
-    nodes = set()
-    for e in expl:
-        if isinstance(e, TBoxAxiom):
-            lhs = e.LHS_concept
-            rhs = e.RHS_concept
-            nodes.add(lhs)
-            nodes.add(rhs)
-        elif isinstance(e, ConceptAssertion):
-            nodes.add(e.concept)
-
-    edges = {}
-    for n in nodes:
-        edges[n] = list()
-
-    for e in expl:
-        if isinstance(e, TBoxAxiom):
-            lhs = e.LHS_concept
-            rhs = e.RHS_concept
-
-            edges[lhs].append(rhs)
-
-            if e.Relationship != "⊑":  # Equivalence
-                edges[rhs].append(lhs)
-
-    for n in nodes:
-        vis = {key: 0 for key in nodes}
-        dfs(n, edges, vis)
-        if sum(vis.values()) == len(nodes):
-            return True
-    return False
-
-
-def opposite_polarity(polarity):
+def opposite_polarity(polarity: str) -> str:
+    """
+    Returns the opposite polarity.
+    """
     return "¬" if polarity != "¬" else "+"
 
 
-def opposite_connective(connective):
-    return "⊓" if connective != "⊓" else "⊓"
+def opposite_connective(connective: str) -> str:
+    """
+    Returns the opposite logical connective.
+    """
+    return "⊔" if connective == "⊓" else "⊔"
 
 
-def opposite_restriction(restriction):
-    if restriction in {"∀", "∃"}:  # Existential
-        if restriction == "∀":
-            return "∃"
-        else:
-            return "∀"
-    else:  # Quantification
-        splitted_restriction = restriction.split()
-        quantifier = splitted_restriction[0]
-        quantity = splitted_restriction[1]
+def opposite_restriction(restriction: str) -> str:
+    """
+    Returns the opposite restriction.
+    """
+    if restriction == "∀":
+        return "∃"
+    elif restriction == "∃":
+        return "∀"
 
-        if quantifier == ">":
-            opposite_quant = "<="
-        elif quantifier == "<":
-            opposite_quant = ">="
-        elif quantifier == "<=":
-            opposite_quant = ">"
-        elif quantifier == ">=":
-            opposite_quant = "<"
-        elif quantifier == "=":
-            opposite_quant = "!="
+    quantifier, quantity = restriction.split()
 
-        return f"{opposite_quant} {quantity}"
+    if quantifier == ">":
+        return f"<= {quantity}"
+    elif quantifier == "<":
+        return f">= {quantity}"
+    elif quantifier == "<=":
+        return f"> {quantity}"
+    elif quantifier == ">=":
+        return f"< {quantity}"
+    elif quantifier == "=":
+        return f"!= {quantity}"
+    else:
+        raise ValueError(f"Unrecognized restriction: {restriction}")
 
 
 def alcq_negate(concept):
+    """
+    Negates an ALCQ concept.
+
+    Parameters:
+    concept: The ALCQ concept to negate.
+
+    Returns:
+    A new ALCQ concept that represents the negation of the input.
+
+    Raises:
+    TypeError: If the concept is not an instance of a recognized ALCQ concept type.
+    """
     negated_concept = None
     if isinstance(concept, AtomicConcept):
         if concept.concept_name == "⊤":
@@ -476,7 +488,6 @@ def alcq_negate(concept):
             concept.atomic_in_rhs,
         )
     else:
-        print(f"ALCQ-NEGATE ERROR! GOT: {concept}")
-        assert False
+        raise TypeError(f"Unexpected concept type: {type(concept)}")
 
     return negated_concept
