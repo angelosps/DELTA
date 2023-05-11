@@ -118,7 +118,7 @@ def AtomicConcept_2_Owl(onto, concept):
                 concept = Nothing
         else:
             if polarity != "+":
-                concept = new_class(concept_name, (Thing,))
+                concept = new_class(f"pos_{concept_name}", (Thing,))
                 concept_name = f"neg_{concept_name}"
                 neg_complex_concept = new_class(concept_name, (Thing,))
                 neg_complex_concept.equivalent_to.append(Not(concept))
@@ -163,9 +163,13 @@ def make_concept(onto, concept2make):
             owl_concept, owl_concept_name = AtomicConcept_2_Owl(onto, concept2make)
         elif isinstance(concept2make, JunctionConcept):
             owl_concept, owl_concept_name = junction_concept_2_owl(onto, concept2make)
-        else:  # Restriction concept
+        elif isinstance(concept2make, RestrictionConcept):  # Restriction concept
             owl_concept, owl_concept_name = restriction_concept_2_owl(
                 onto, concept2make
+            )
+        else:
+            raise TypeError(
+                "Unexpected type for concept2make: {}".format(type(concept2make))
             )
 
     return owl_concept, owl_concept_name
@@ -214,9 +218,6 @@ def create_ontology(id, ABoxAssertions, TBoxAxioms):
     Args:
         ABoxAssertions (list):  List with the ABox assertions
         TBoxAxioms (list):      List with the TBox axioms
-
-    Returns:
-        Boolean:   True iff the ontology created successfully, False otherwise.
     """
 
     onto = get_ontology("http://alcq.org/onto.owl")

@@ -72,7 +72,9 @@ def decode_owl_axiom(axiom_text):
         and "+" in splitted_axiom_text
         and "¬" in splitted_axiom_text
     ):
-        return AtomicConcept("+", axiom_text)
+        print(f"AXIOM TEXT: {axiom_text}")
+        assert False
+        # return AtomicConcept("+", axiom_text)
     concept = parse_concept(axiom_text)
     return concept
 
@@ -117,7 +119,15 @@ def EquivalentClassesClass(text, statements_NL=None):
     if RHS_text is None or after_RHS_idx is None:
         return None
     if "objectcomplementof" in text[after_LHS_idx:].lower():
-        RHS_text = f"neg_{RHS_text}"
+        # print(f"RHS TEXT TO COMPLEMENT: {RHS_text}")
+        if RHS_text[:3] == "pos":
+            RHS_text = f"neg_{RHS_text[3:]}"
+        elif RHS_text[:3] == "neg":
+            RHS_text = f"pos_{RHS_text[3:]}"
+        else:
+            assert False
+            # RHS_text = f"neg_{RHS_text}"
+
     elif "objectunionof" in text[after_LHS_idx:].lower():
         union_lhs = RHS_text
         union_rhs, _ = skip_url(text, after_RHS_idx)
@@ -173,7 +183,7 @@ def EquivalentClassesClass(text, statements_NL=None):
 
     RHS_concept = decode_owl_axiom(RHS_text)
     concept_equivalence = TBoxAxiom(LHS_concept, "≡", RHS_concept)
-
+    # print(f"concept_equivalence = {concept_equivalence}")
     if statements_NL is not None and concept_equivalence not in statements_NL:
         statements_NL[concept_equivalence] = concept_equivalence.nl()
     return concept_equivalence

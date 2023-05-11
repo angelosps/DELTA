@@ -223,6 +223,8 @@ def process_ontology_and_inferred_axioms(
         print("INCOHERENT ONTOLOGY!")
         return None, None
 
+    # print(owlapi_output)
+
     theory = Theory(
         list(generated_abox),
         list(generated_tbox),
