@@ -62,123 +62,81 @@ def is_junction_concept(text, connective):
     return -1
 
 
+def parse_atomic_concept(text_list):
+    polarity = text_list[0]
+    concept_name = text_list[1]
+    return AtomicConcept(polarity, concept_name)
+
+
+def parse_junction_concept(text, connective):
+    lhs_text, rhs_text = text.split(connective)
+
+    lhs_text = lhs_text[lhs_text.find("(") + 1 : lhs_text.rfind(")")]
+    rhs_text = rhs_text[rhs_text.find("(") + 1 : rhs_text.rfind(")")]
+
+    lhs_concept = parse_concept(lhs_text.strip())
+    rhs_concept = parse_concept(rhs_text.strip())
+
+    atomic_in_lhs = isinstance(lhs_concept, AtomicConcept) or (
+        isinstance(lhs_concept, JunctionConcept) and lhs_concept.has_atomic
+    )
+
+    atomic_in_rhs = isinstance(rhs_concept, AtomicConcept) or (
+        isinstance(rhs_concept, JunctionConcept) and rhs_concept.has_atomic
+    )
+
+    return JunctionConcept(
+        lhs_concept, connective, rhs_concept, atomic_in_lhs, atomic_in_rhs
+    )
+
+
+def parse_restriction_concept(text, restriction, role_idx=1):
+    text_list = text.split()
+    role_name = text_list[role_idx]
+    inner_concept = ""
+
+    left_parentheses = 1
+    right_parentheses = 0
+    start_idx = text.find("(") + 1
+
+    for x in text[start_idx:]:
+        if x == "(":
+            left_parentheses += 1
+        elif x == ")":
+            right_parentheses += 1
+
+        if left_parentheses == right_parentheses:
+            break
+        inner_concept += x
+
+    return RestrictionConcept(
+        restriction, role_name, parse_concept(inner_concept.strip())
+    )
+
+
 def parse_concept(text):
-    """Parses text into a Concept"""
+    """Parses DL text into a Concept"""
 
     text = text.strip()
     text_list = text.replace("(", "").replace(")", "").split()
 
     if len(text_list) == 2:
-        polarity = text_list[0]
-        concept_name = text_list[1]
-        return AtomicConcept(polarity, concept_name)
+        return parse_atomic_concept(text_list)
 
-    connective_idx = is_junction_concept(text, connective="⊓")
-    if connective_idx != -1:
-        lhs_text = str()
-        rhs_text = str()
+    if "⊓" in text:
+        return parse_junction_concept(text, "⊓")
 
-        atomic_in_lhs = False
-        atomic_in_rhs = False
-
-        lhs_text = text[0:connective_idx]
-        rhs_text = text[connective_idx + 1 :]
-
-        lhs_first_par_idx = lhs_text.find("(")
-        lhs_last_par_idx = lhs_text.rfind(")")
-        lhs_concept = parse_concept(
-            lhs_text[lhs_first_par_idx + 1 : lhs_last_par_idx].strip()
-        )
-        if isinstance(lhs_concept, AtomicConcept) or (
-            isinstance(lhs_concept, JunctionConcept) and lhs_concept.has_atomic
-        ):
-            atomic_in_lhs = True
-        rhs_first_par_idx = rhs_text.find("(")
-        rhs_last_par_idx = rhs_text.rfind(")")
-        rhs_concept = parse_concept(
-            rhs_text[rhs_first_par_idx + 1 : rhs_last_par_idx].strip()
-        )
-        if isinstance(rhs_concept, AtomicConcept) or (
-            isinstance(rhs_concept, JunctionConcept) and rhs_concept.has_atomic
-        ):
-            atomic_in_rhs = True
-        return JunctionConcept(
-            lhs_concept, "⊓", rhs_concept, atomic_in_lhs, atomic_in_rhs
-        )
-
-    connective_idx = is_junction_concept(text, connective="⊔")
-    if connective_idx != -1:
-        lhs_text = str()
-        rhs_text = str()
-        atomic_in_lhs = False
-        atomic_in_rhs = False
-
-        lhs_text = text[0:connective_idx]
-        rhs_text = text[connective_idx + 1 :]
-
-        lhs_first_par_idx = lhs_text.find("(")
-        lhs_last_par_idx = lhs_text.rfind(")")
-        lhs_concept = parse_concept(
-            lhs_text[lhs_first_par_idx + 1 : lhs_last_par_idx].strip()
-        )
-        if isinstance(lhs_concept, AtomicConcept) or (
-            isinstance(lhs_concept, JunctionConcept) and lhs_concept.has_atomic
-        ):
-            atomic_in_lhs = True
-        rhs_first_par_idx = rhs_text.find("(")
-        rhs_last_par_idx = rhs_text.rfind(")")
-        rhs_concept = parse_concept(
-            rhs_text[rhs_first_par_idx + 1 : rhs_last_par_idx].strip()
-        )
-        if isinstance(rhs_concept, AtomicConcept) or (
-            isinstance(rhs_concept, JunctionConcept) and rhs_concept.has_atomic
-        ):
-            atomic_in_rhs = True
-        return JunctionConcept(
-            lhs_concept, "⊔", rhs_concept, atomic_in_lhs, atomic_in_rhs
-        )
+    if "⊔" in text:
+        return parse_junction_concept(text, "⊔")
 
     if text_list[0] in {"∀", "∃"}:
-        inner_concept = str()
-        restriction = text_list[0]
-        role_name = text_list[1]
-        left_parentheses = 1
-        right_parentheses = 0
-        start_idx = text.find("(") + 1
-        for x in text[start_idx:]:
-            if x == "(":
-                left_parentheses += 1
-            elif x == ")":
-                right_parentheses += 1
+        return parse_restriction_concept(text, restriction=text_list[0])
 
-            if left_parentheses == right_parentheses:
-                break
-            inner_concept += x
-        return RestrictionConcept(
-            restriction, role_name, parse_concept(inner_concept.strip())
-        )
-    elif text_list[0] in {">", "<", "=", ">=", "<="}:
-        inner_concept = str()
+    if text_list[0] in {">", "<", "=", ">=", "<="}:
         restriction = " ".join(text_list[0:2])
-        role_name = text_list[2]
-        left_parentheses = 1
-        right_parentheses = 0
-        start_idx = text.find("(") + 1
-        for x in text[start_idx:]:
-            if x == "(":
-                left_parentheses += 1
-            elif x == ")":
-                right_parentheses += 1
+        return parse_restriction_concept(text, restriction=restriction, role_idx=2)
 
-            if left_parentheses == right_parentheses:
-                break
-            inner_concept += x
-        return RestrictionConcept(
-            restriction, role_name, parse_concept(inner_concept.strip())
-        )
-    else:
-        print(f"Unexpected text in parser: '{text}'")
-        assert False
+    raise ValueError(f"Unexpected text in concept parser: {text}")
 
 
 def parse_tbox_axiom(statement_txt):
@@ -288,7 +246,6 @@ def tbox_axiom_constrain_check(generated_tbox_axiom, current_tbox):
 
 def build_graph(tbox_axioms):
     graph = {}
-
     for axiom in tbox_axioms:
         lhs = axiom.LHS_concept
         rhs = axiom.RHS_concept
@@ -343,7 +300,7 @@ def concept_assertion_constrain_check(
     if contains_same_sides(concept):
         return False
 
-    # If the negated concept is in the generated ABox
+    # Check if the negated concept is in the generated ABox
     if ConceptAssertion(alcq_negate(concept), individual) in generated_abox_assertions:
         return False
 

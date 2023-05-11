@@ -540,7 +540,7 @@ def run(args):
         grammar = PCFG.fromstring(grammar_str)
 
         print(
-            f"\n\nStarting data generation with grammar: '{args.grammar}', number of examples: {args.num_of_examples}, max depth: {args.max_depth}.\n"
+            f"\nStarting data generation with grammar: '{args.grammar}', number of examples: {args.num_of_examples}, max depth: {args.max_depth}.\n"
         )
 
         generate_theory(
