@@ -73,6 +73,7 @@ def make_true_questions(lookup_pool, inferred_axioms, max_depth, context2NL):
     if max_depth == 0:
         return questions
 
+    qID += 1
     # Map inferred axioms according to (Depth, Type)
     mapped_axioms = defaultdict(list)
     for ia in inferred_axioms:
