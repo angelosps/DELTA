@@ -68,8 +68,9 @@ def parse_atomic_concept(text_list):
     return AtomicConcept(polarity, concept_name)
 
 
-def parse_junction_concept(text, connective):
-    lhs_text, rhs_text = text.split(connective)
+def parse_junction_concept(text, connective_idx):
+    lhs_text = text[0:connective_idx]
+    rhs_text = text[connective_idx + 1 :]
 
     lhs_text = lhs_text[lhs_text.find("(") + 1 : lhs_text.rfind(")")]
     rhs_text = rhs_text[rhs_text.find("(") + 1 : rhs_text.rfind(")")]
@@ -86,7 +87,7 @@ def parse_junction_concept(text, connective):
     )
 
     return JunctionConcept(
-        lhs_concept, connective, rhs_concept, atomic_in_lhs, atomic_in_rhs
+        lhs_concept, text[connective_idx], rhs_concept, atomic_in_lhs, atomic_in_rhs
     )
 
 
@@ -114,20 +115,147 @@ def parse_restriction_concept(text, restriction, role_idx=1):
     )
 
 
+def old_parse_concept(text):
+    """Parses text into a Concept"""
+
+    text = text.strip()
+    text_list = text.replace("(", "").replace(")", "").split()
+
+    if len(text_list) == 2:
+        polarity = text_list[0]
+        concept_name = text_list[1]
+        return AtomicConcept(polarity, concept_name)
+
+    connective_idx = is_junction_concept(text, connective="⊓")
+    if connective_idx != -1:
+        lhs_text = str()
+        rhs_text = str()
+
+        atomic_in_lhs = False
+        atomic_in_rhs = False
+
+        lhs_text = text[0:connective_idx]
+        rhs_text = text[connective_idx + 1 :]
+
+        lhs_first_par_idx = lhs_text.find("(")
+        lhs_last_par_idx = lhs_text.rfind(")")
+        lhs_concept = parse_concept(
+            lhs_text[lhs_first_par_idx + 1 : lhs_last_par_idx].strip()
+        )
+        if isinstance(lhs_concept, AtomicConcept) or (
+            isinstance(lhs_concept, JunctionConcept) and lhs_concept.has_atomic
+        ):
+            atomic_in_lhs = True
+        rhs_first_par_idx = rhs_text.find("(")
+        rhs_last_par_idx = rhs_text.rfind(")")
+        rhs_concept = parse_concept(
+            rhs_text[rhs_first_par_idx + 1 : rhs_last_par_idx].strip()
+        )
+        if isinstance(rhs_concept, AtomicConcept) or (
+            isinstance(rhs_concept, JunctionConcept) and rhs_concept.has_atomic
+        ):
+            atomic_in_rhs = True
+        return JunctionConcept(
+            lhs_concept, "⊓", rhs_concept, atomic_in_lhs, atomic_in_rhs
+        )
+
+    connective_idx = is_junction_concept(text, connective="⊔")
+    if connective_idx != -1:
+        lhs_text = str()
+        rhs_text = str()
+        atomic_in_lhs = False
+        atomic_in_rhs = False
+
+        lhs_text = text[0:connective_idx]
+        rhs_text = text[connective_idx + 1 :]
+
+        lhs_first_par_idx = lhs_text.find("(")
+        lhs_last_par_idx = lhs_text.rfind(")")
+        lhs_concept = parse_concept(
+            lhs_text[lhs_first_par_idx + 1 : lhs_last_par_idx].strip()
+        )
+        if isinstance(lhs_concept, AtomicConcept) or (
+            isinstance(lhs_concept, JunctionConcept) and lhs_concept.has_atomic
+        ):
+            atomic_in_lhs = True
+        rhs_first_par_idx = rhs_text.find("(")
+        rhs_last_par_idx = rhs_text.rfind(")")
+        rhs_concept = parse_concept(
+            rhs_text[rhs_first_par_idx + 1 : rhs_last_par_idx].strip()
+        )
+        if isinstance(rhs_concept, AtomicConcept) or (
+            isinstance(rhs_concept, JunctionConcept) and rhs_concept.has_atomic
+        ):
+            atomic_in_rhs = True
+        return JunctionConcept(
+            lhs_concept, "⊔", rhs_concept, atomic_in_lhs, atomic_in_rhs
+        )
+
+    if text_list[0] in {"∀", "∃"}:
+        inner_concept = str()
+        restriction = text_list[0]
+        role_name = text_list[1]
+        left_parentheses = 1
+        right_parentheses = 0
+        start_idx = text.find("(") + 1
+        for x in text[start_idx:]:
+            if x == "(":
+                left_parentheses += 1
+            elif x == ")":
+                right_parentheses += 1
+
+            if left_parentheses == right_parentheses:
+                break
+            inner_concept += x
+        return RestrictionConcept(
+            restriction, role_name, parse_concept(inner_concept.strip())
+        )
+    elif text_list[0] in {">", "<", "=", ">=", "<="}:
+        inner_concept = str()
+        restriction = " ".join(text_list[0:2])
+        role_name = text_list[2]
+        left_parentheses = 1
+        right_parentheses = 0
+        start_idx = text.find("(") + 1
+        for x in text[start_idx:]:
+            if x == "(":
+                left_parentheses += 1
+            elif x == ")":
+                right_parentheses += 1
+
+            if left_parentheses == right_parentheses:
+                break
+            inner_concept += x
+        return RestrictionConcept(
+            restriction, role_name, parse_concept(inner_concept.strip())
+        )
+    else:
+        print(f"Unexpected text in parser: '{text}'")
+        assert False
+
+
 def parse_concept(text):
     """Parses DL text into a Concept"""
-
+    original_text = text
     text = text.strip()
     text_list = text.replace("(", "").replace(")", "").split()
 
     if len(text_list) == 2:
         return parse_atomic_concept(text_list)
 
-    if "⊓" in text:
-        return parse_junction_concept(text, "⊓")
+    conjunction_idx = is_junction_concept(text, connective="⊓")
+    if conjunction_idx != -1:
+        ans = parse_junction_concept(text, conjunction_idx)
+        old_ans = old_parse_concept(original_text)
+        assert ans == old_ans
+        return ans
 
-    if "⊔" in text:
-        return parse_junction_concept(text, "⊔")
+    disjunction_idx = is_junction_concept(text, connective="⊔")
+    if disjunction_idx != -1:
+        ans = parse_junction_concept(text, disjunction_idx)
+        old_ans = old_parse_concept(original_text)
+        assert ans == old_ans
+        return ans
 
     if text_list[0] in {"∀", "∃"}:
         return parse_restriction_concept(text, restriction=text_list[0])

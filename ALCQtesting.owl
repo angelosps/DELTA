@@ -1,0 +1,534 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xml:base="http://alcq.org/onto.owl"
+         xmlns="http://alcq.org/onto.owl#">
+
+<owl:Ontology rdf:about="http://alcq.org/onto.owl"/>
+
+<owl:ObjectProperty rdf:about="#guides">
+  <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#mentors">
+  <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#instructs">
+  <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#supports">
+  <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#leads">
+  <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#supervises">
+  <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#consults">
+  <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:ObjectProperty>
+
+<owl:ObjectProperty rdf:about="#admires">
+  <rdfs:domain rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:range rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:ObjectProperty>
+
+<owl:Class rdf:about="#pos_determined">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:Class>
+
+<owl:Class rdf:about="#pos_logical">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:Class>
+
+<owl:Class rdf:about="#pos_innovative">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:Class>
+
+<owl:Class rdf:about="#neg_innovative">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:complementOf rdf:resource="#pos_innovative"/>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#pos_persevering">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:Class>
+
+<owl:Class rdf:about="#pos_enthusiastic">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <rdfs:subClassOf rdf:resource="#EQ3_supervises_d_L_L_neg_creative_R_and_L_L_neg_persevering_R_and_L_exists_admires_d_L_neg_persevering_R_R_R_R"/>
+</owl:Class>
+
+<owl:Class rdf:about="#neg_enthusiastic">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:complementOf rdf:resource="#pos_enthusiastic"/>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#pos_ambitious">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:Class>
+
+<owl:Class rdf:about="#pos_creative">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:Class>
+
+<owl:Class rdf:about="#neg_creative">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:complementOf rdf:resource="#pos_creative"/>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#exists_mentors_d_L_pos_Thing_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#mentors"/>
+      <owl:someValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#pos_confident">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+</owl:Class>
+
+<owl:Class rdf:about="#neg_persevering">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:complementOf rdf:resource="#pos_persevering"/>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#neg_confident">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:complementOf rdf:resource="#pos_confident"/>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#neg_logical">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:complementOf rdf:resource="#pos_logical"/>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#MT3_instructs_d_L_pos_determined_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#instructs"/>
+      <owl:onClass rdf:resource="#pos_determined"/>
+      <owl:minQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">4</owl:minQualifiedCardinality>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_pos_determined_R_and_L_MT3_instructs_d_L_pos_determined_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#pos_determined"/>
+        <rdf:Description rdf:about="#MT3_instructs_d_L_pos_determined_R"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_neg_innovative_R_and_L_L_pos_determined_R_and_L_MT3_instructs_d_L_pos_determined_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#neg_innovative"/>
+        <rdf:Description rdf:about="#L_pos_determined_R_and_L_MT3_instructs_d_L_pos_determined_R_R"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#only_mentors_d_L_L_neg_innovative_R_and_L_L_pos_determined_R_and_L_MT3_instructs_d_L_pos_determined_R_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#mentors"/>
+      <owl:allValuesFrom rdf:resource="#L_neg_innovative_R_and_L_L_pos_determined_R_and_L_MT3_instructs_d_L_pos_determined_R_R_R"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#only_admires_d_L_pos_Nothing_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#admires"/>
+      <owl:allValuesFrom rdf:resource="http://www.w3.org/2002/07/owl#Nothing"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#AL2_consults_d_L_pos_logical_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#consults"/>
+      <owl:onClass rdf:resource="#pos_logical"/>
+      <owl:minQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">2</owl:minQualifiedCardinality>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#exists_supports_d_L_AL2_consults_d_L_pos_logical_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#supports"/>
+      <owl:someValuesFrom rdf:resource="#AL2_consults_d_L_pos_logical_R"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_pos_persevering_R_and_L_exists_supports_d_L_AL2_consults_d_L_pos_logical_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#pos_persevering"/>
+        <rdf:Description rdf:about="#exists_supports_d_L_AL2_consults_d_L_pos_logical_R_R"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_only_admires_d_L_pos_Nothing_R_R_or_L_L_pos_persevering_R_and_L_exists_supports_d_L_AL2_consults_d_L_pos_logical_R_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:unionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#only_admires_d_L_pos_Nothing_R"/>
+        <rdf:Description rdf:about="#L_pos_persevering_R_and_L_exists_supports_d_L_AL2_consults_d_L_pos_logical_R_R_R"/>
+      </owl:unionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#only_consults_d_L_pos_enthusiastic_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#consults"/>
+      <owl:allValuesFrom rdf:resource="#pos_enthusiastic"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#exists_instructs_d_L_neg_confident_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#instructs"/>
+      <owl:someValuesFrom rdf:resource="#neg_confident"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_only_consults_d_L_pos_enthusiastic_R_R_or_L_exists_instructs_d_L_neg_confident_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:unionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#only_consults_d_L_pos_enthusiastic_R"/>
+        <rdf:Description rdf:about="#exists_instructs_d_L_neg_confident_R"/>
+      </owl:unionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#only_guides_d_L_pos_enthusiastic_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#guides"/>
+      <owl:allValuesFrom rdf:resource="#pos_enthusiastic"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_neg_enthusiastic_R_and_L_only_guides_d_L_pos_enthusiastic_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#neg_enthusiastic"/>
+        <rdf:Description rdf:about="#only_guides_d_L_pos_enthusiastic_R"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_neg_creative_R_and_L_L_neg_enthusiastic_R_and_L_only_guides_d_L_pos_enthusiastic_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#neg_creative"/>
+        <rdf:Description rdf:about="#L_neg_enthusiastic_R_and_L_only_guides_d_L_pos_enthusiastic_R_R"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#AM1_leads_d_L_L_neg_creative_R_and_L_L_neg_enthusiastic_R_and_L_only_guides_d_L_pos_enthusiastic_R_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#leads"/>
+      <owl:onClass rdf:resource="#L_neg_creative_R_and_L_L_neg_enthusiastic_R_and_L_only_guides_d_L_pos_enthusiastic_R_R_R"/>
+      <owl:maxQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxQualifiedCardinality>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_neg_enthusiastic_R_and_L_exists_mentors_d_L_pos_Thing_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#neg_enthusiastic"/>
+        <rdf:Description rdf:about="#exists_mentors_d_L_pos_Thing_R"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_exists_mentors_d_L_pos_Thing_R_R_or_L_L_neg_enthusiastic_R_and_L_exists_mentors_d_L_pos_Thing_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:unionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#exists_mentors_d_L_pos_Thing_R"/>
+        <rdf:Description rdf:about="#L_neg_enthusiastic_R_and_L_exists_mentors_d_L_pos_Thing_R_R"/>
+      </owl:unionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#exists_admires_d_L_L_exists_mentors_d_L_pos_Thing_R_R_or_L_L_neg_enthusiastic_R_and_L_exists_mentors_d_L_pos_Thing_R_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#admires"/>
+      <owl:someValuesFrom rdf:resource="#L_exists_mentors_d_L_pos_Thing_R_R_or_L_L_neg_enthusiastic_R_and_L_exists_mentors_d_L_pos_Thing_R_R_R"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+  <rdfs:subClassOf rdf:resource="#only_supervises_d_L_L_LT1_mentors_d_L_neg_enthusiastic_R_R_or_L_L_pos_ambitious_R_or_L_pos_innovative_R_R_R"/>
+</owl:Class>
+
+<owl:Class rdf:about="#exists_admires_d_L_neg_persevering_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#admires"/>
+      <owl:someValuesFrom rdf:resource="#neg_persevering"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_neg_persevering_R_and_L_exists_admires_d_L_neg_persevering_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#neg_persevering"/>
+        <rdf:Description rdf:about="#exists_admires_d_L_neg_persevering_R"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_neg_creative_R_and_L_L_neg_persevering_R_and_L_exists_admires_d_L_neg_persevering_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#neg_creative"/>
+        <rdf:Description rdf:about="#L_neg_persevering_R_and_L_exists_admires_d_L_neg_persevering_R_R"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#EQ3_supervises_d_L_L_neg_creative_R_and_L_L_neg_persevering_R_and_L_exists_admires_d_L_neg_persevering_R_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#supervises"/>
+      <owl:onClass rdf:resource="#L_neg_creative_R_and_L_L_neg_persevering_R_and_L_exists_admires_d_L_neg_persevering_R_R_R"/>
+      <owl:qualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">3</owl:qualifiedCardinality>
+    </owl:Restriction>
+  </owl:equivalentClass>
+  <rdfs:subClassOf rdf:resource="#only_mentors_d_L_L_AM1_consults_d_L_neg_persevering_R_R_and_L_L_pos_innovative_R_and_L_neg_logical_R_R_R"/>
+</owl:Class>
+
+<owl:Class rdf:about="#AM1_consults_d_L_neg_persevering_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#consults"/>
+      <owl:onClass rdf:resource="#neg_persevering"/>
+      <owl:maxQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">1</owl:maxQualifiedCardinality>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_pos_innovative_R_and_L_neg_logical_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#pos_innovative"/>
+        <rdf:Description rdf:about="#neg_logical"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_AM1_consults_d_L_neg_persevering_R_R_and_L_L_pos_innovative_R_and_L_neg_logical_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:intersectionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#AM1_consults_d_L_neg_persevering_R"/>
+        <rdf:Description rdf:about="#L_pos_innovative_R_and_L_neg_logical_R"/>
+      </owl:intersectionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#only_mentors_d_L_L_AM1_consults_d_L_neg_persevering_R_R_and_L_L_pos_innovative_R_and_L_neg_logical_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#mentors"/>
+      <owl:allValuesFrom rdf:resource="#L_AM1_consults_d_L_neg_persevering_R_R_and_L_L_pos_innovative_R_and_L_neg_logical_R_R"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#LT1_mentors_d_L_neg_enthusiastic_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#mentors"/>
+      <owl:onClass rdf:resource="#neg_enthusiastic"/>
+      <owl:maxQualifiedCardinality rdf:datatype="http://www.w3.org/2001/XMLSchema#nonNegativeInteger">0</owl:maxQualifiedCardinality>
+    </owl:Restriction>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_pos_ambitious_R_or_L_pos_innovative_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:unionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#pos_ambitious"/>
+        <rdf:Description rdf:about="#pos_innovative"/>
+      </owl:unionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#L_LT1_mentors_d_L_neg_enthusiastic_R_R_or_L_L_pos_ambitious_R_or_L_pos_innovative_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Class>
+      <owl:unionOf rdf:parseType="Collection">
+        <rdf:Description rdf:about="#LT1_mentors_d_L_neg_enthusiastic_R"/>
+        <rdf:Description rdf:about="#L_pos_ambitious_R_or_L_pos_innovative_R"/>
+      </owl:unionOf>
+    </owl:Class>
+  </owl:equivalentClass>
+</owl:Class>
+
+<owl:Class rdf:about="#only_supervises_d_L_L_LT1_mentors_d_L_neg_enthusiastic_R_R_or_L_L_pos_ambitious_R_or_L_pos_innovative_R_R_R">
+  <rdfs:subClassOf rdf:resource="http://www.w3.org/2002/07/owl#Thing"/>
+  <owl:equivalentClass>
+    <owl:Restriction>
+      <owl:onProperty rdf:resource="#supervises"/>
+      <owl:allValuesFrom rdf:resource="#L_LT1_mentors_d_L_neg_enthusiastic_R_R_or_L_L_pos_ambitious_R_or_L_pos_innovative_R_R"/>
+    </owl:Restriction>
+  </owl:equivalentClass>
+  <rdfs:subClassOf rdf:resource="#pos_enthusiastic"/>
+</owl:Class>
+
+<owl:Thing rdf:about="#Dimitrios">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  <rdf:type rdf:resource="#only_mentors_d_L_L_neg_innovative_R_and_L_L_pos_determined_R_and_L_MT3_instructs_d_L_pos_determined_R_R_R_R"/>
+</owl:Thing>
+
+<owl:Thing rdf:about="#Angelos">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  <rdf:type rdf:resource="#L_only_admires_d_L_pos_Nothing_R_R_or_L_L_pos_persevering_R_and_L_exists_supports_d_L_AL2_consults_d_L_pos_logical_R_R_R_R"/>
+</owl:Thing>
+
+<owl:Thing rdf:about="#Ioanna">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  <rdf:type rdf:resource="#L_only_consults_d_L_pos_enthusiastic_R_R_or_L_exists_instructs_d_L_neg_confident_R_R"/>
+</owl:Thing>
+
+<owl:Thing rdf:about="#Maria">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  <rdf:type rdf:resource="#AM1_leads_d_L_L_neg_creative_R_and_L_L_neg_enthusiastic_R_and_L_only_guides_d_L_pos_enthusiastic_R_R_R_R"/>
+</owl:Thing>
+
+<owl:Thing rdf:about="#Eleni">
+  <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#NamedIndividual"/>
+  <mentors rdf:resource="#Dimitrios"/>
+  <rdf:type rdf:resource="#exists_admires_d_L_L_exists_mentors_d_L_pos_Thing_R_R_or_L_L_neg_enthusiastic_R_and_L_exists_mentors_d_L_pos_Thing_R_R_R_R"/>
+</owl:Thing>
+
+<owl:AllDifferent>
+  <owl:distinctMembers rdf:parseType="Collection">
+    <rdf:Description rdf:about="#Dimitrios"/>
+    <rdf:Description rdf:about="#Angelos"/>
+    <rdf:Description rdf:about="#Ioanna"/>
+    <rdf:Description rdf:about="#Maria"/>
+    <rdf:Description rdf:about="#Eleni"/>
+  </owl:distinctMembers>
+</owl:AllDifferent>
+
+
+</rdf:RDF>
