@@ -276,6 +276,6 @@ def create_ontology(id, ABoxAssertions, TBoxAxioms):
         if len(individuals) >= 2:
             AllDifferent(individuals)
 
-        onto.save(f"./ALCQtesting.owl", "rdfxml")
-        onto.save(f"./Generated-Ontologies/ALCQ-Ontology-{id}.owl", "rdfxml")
+        onto.save(f"./ALCQ_ontology.owl", "rdfxml")
+        # onto.save(f"./Generated-Ontologies/ALCQ-Ontology-{id}.owl", "rdfxml")
         onto.destroy(update_relation=True, update_is_a=True)

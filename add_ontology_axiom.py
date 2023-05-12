@@ -7,7 +7,7 @@ from types import new_class
 def KB_union_unknown_axiom(axiom):
     # The axiom would be a false question if KB U {Axiom} -> Inconsistent KB
     # Load the current ontology
-    onto = get_ontology("./ALCQtesting.owl").load()
+    onto = get_ontology("./ALCQ_ontology.owl").load()
 
     # Add the "unknown" question axiom to it
     with onto:

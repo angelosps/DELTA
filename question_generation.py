@@ -332,7 +332,7 @@ def generate_unknown_questions(qID, num_of_unknown_questions, grammar, all2NL):
             "id": qID,
             "text": random_unknown_axiom_nl,
             "label": "Unknown",
-            "depth": 0,
+            "depth": "na",
             "meta": {
                 "DL": str(random_unknown_axiom),
                 "type": str(type(random_unknown_axiom)),

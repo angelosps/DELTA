@@ -39,13 +39,14 @@ def example_is_valid(context, questions):
 
     for question in questions:
         if (
-            question["depth"] == 0
-            and question["label"] == "True"
+            question["label"] == "True"
+            and question["depth"] == 0
             and f"{question['text']}." not in context
         ):
             return False
         elif (
-            question["depth"] >= 1
+            question["label"] == "Unknown"
+            or question["depth"] >= 1
             or (question["depth"] == 0 and question["label"] != "True")
         ) and f"{question['text']}." in context:
             return False
@@ -489,7 +490,7 @@ def generate_theory(grammar, config, theory_op_file, num_of_examples, max_depth)
 
             ## Delete .owl files ##
             remove("ALCQCC.owl")
-            remove("ALCQtesting.owl")
+            remove("ALCQ_ontology.owl")
             curr_num_examples += 1
             progress_tracker.update()
 

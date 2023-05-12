@@ -7,7 +7,7 @@ data_dir="DATA"
 # Create the data directory if it doesn't exist
 mkdir -p "${data_dir}"
 
-for depth in 0 1; do
+for depth in 1 2; do
   depth_dir="${data_dir}/Depth${depth}"
 
   # Create the depth directory if it doesn't exist
