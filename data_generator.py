@@ -211,7 +211,7 @@ def process_ontology_and_inferred_axioms(
         preexec_fn=setsid,
     ) as process:
         try:
-            owlapi_output = process.communicate(timeout=4.5)[0]
+            owlapi_output = process.communicate(timeout=5)[0]
         except TimeoutExpired:
             killpg(process.pid, SIGTERM)
             return None, None
@@ -312,6 +312,7 @@ def generate_example_questions(
     all2NL,
 ):
     concept_assertions, lookup_questions_pool = prepare_pools(theory)
+
     if not concept_assertions:
         # print("concept_assertions pool is empty!")
         # print(theory.ABoxAssertions)
@@ -321,11 +322,13 @@ def generate_example_questions(
     if not lookup_questions_pool:
         # print("lookup_questions_pool pool is empty!")
         return None
+
     qID = 2 * (max_depth + 1) + 1
     n_unknown_questions = max_depth + 1
     unknown_questions = generate_unknown_questions(
         qID, n_unknown_questions, grammar, all2NL
     )
+
     if unknown_questions is None:
         # print("No unknown questions!")
         return None
@@ -338,6 +341,7 @@ def generate_example_questions(
         concept_assertions,
         context2NL,
     )
+
     if questions is None:
         # print("No false questions!")
         return None

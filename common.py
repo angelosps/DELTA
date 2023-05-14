@@ -112,40 +112,35 @@ class JunctionConcept(Concept):
             "rhs_concept": self.rhs_concept.to_json(),
         }
 
+    def format_nl_string(self, LHS_nl, RHS_nl, connective, pronoun):
+        if pronoun == "they ":
+            return f"{LHS_nl} {connective} {pluralize(f'{pronoun}{RHS_nl}')}"
+        else:
+            return f"{LHS_nl} {connective} {pronoun}{RHS_nl}"
+
     def nl(self, pronoun=""):
         LHS_nl = self.lhs_concept.nl()
-        if isinstance(self.rhs_concept, JunctionConcept):
-            RHS_nl = self.rhs_concept.nl(pronoun=pronoun)
-        else:
-            RHS_nl = self.rhs_concept.nl()
-
-        concept_nl = str()
-        connective = "or"
+        RHS_nl = (
+            self.rhs_concept.nl()
+            if not isinstance(self.rhs_concept, JunctionConcept)
+            else self.rhs_concept.nl(pronoun=pronoun)
+        )
+        connective = "and" if self.relationship == "⊓" else "or"
 
         if pronoun != "":
             pronoun += " "
 
-        if self.relationship == "⊓":
-            connective = "and"
-
-        if (self.atomic_in_lhs == False) and (self.atomic_in_rhs == True):
+        if not self.atomic_in_lhs and self.atomic_in_rhs:
             LHS_nl, RHS_nl = RHS_nl, LHS_nl
-            if pronoun == "they ":
-                return f"{LHS_nl} {connective} {pluralize(f'{pronoun}{RHS_nl}')}"
-            else:
-                return f"{LHS_nl} {connective} {pronoun}{RHS_nl}"
+            return self.format_nl_string(LHS_nl, RHS_nl, connective, pronoun)
 
-        elif isinstance(self.rhs_concept, RestrictionConcept) or (
+        if isinstance(self.rhs_concept, RestrictionConcept) or (
             isinstance(self.rhs_concept, JunctionConcept)
             and not self.rhs_concept.has_atomic
         ):
-            if pronoun == "they ":
-                return f"{LHS_nl} {connective} {pluralize(f'{pronoun}{RHS_nl}')}"
-            else:
-                return f"{LHS_nl} {connective} {pronoun}{RHS_nl}"
+            return self.format_nl_string(LHS_nl, RHS_nl, connective, pronoun)
 
-        concept_nl = f"{LHS_nl} {connective} {RHS_nl}"
-        return concept_nl
+        return f"{LHS_nl} {connective} {RHS_nl}"
 
 
 def num2word(num):
@@ -270,8 +265,7 @@ class RestrictionConcept(Concept):
             elif quantifier == "!=":
                 quantifier_nl = "either less or more than"
             else:
-                print(f"Unknown quantifier: {quantifier}")
-                assert False
+                raise ValueError(f"Unknown quantifier: {quantifier}")
 
             restr_concept_nl = f"{role_name.replace('_',' ')} {quantifier_nl} {num2word(quantity)} {quantity_suffix}"
 
@@ -373,10 +367,9 @@ class RoleAssertion:
         }
 
     def nl(self):
-        role_nl = (
+        return (
             f"{self.Individual_l} {self.RoleName.replace('_', ' ')} {self.Individual_r}"
         )
-        return role_nl
 
 
 class TBoxAxiom:
@@ -420,134 +413,146 @@ class TBoxAxiom:
             "RHS_concept": self.RHS_concept.to_json(),
         }
 
-    def nl(self):
-        LHS_representation = str()
-        RHS_representation = str()
-
-        lhs_pronoun = "someone"
-        rhs_pronoun = "they are"
-
-        ### SPECIAL AXIOMS ###
-        if (
+    def is_special_axiom(self):
+        """
+        Checks whether the TBox axiom is in the form: + ⊤ ⊑ ∀ RoleName . ( Concept ).
+        This is the only special axiom of the two that we want a special NL representation for it.
+        """
+        return (
             isinstance(self.LHS_concept, AtomicConcept)
             and self.LHS_concept.concept_name == "⊤"
-        ):
-            # Likes only things that are blue and they chase someone red
-            axiom_nl = (
-                f"{lhs_pronoun.capitalize()} can {pluralize(self.RHS_concept.nl())}"
-            )
-            return axiom_nl
+        )
 
-        # With some probability, choose one of the attribute templates,
-        # and if concept conditions met
-        choice = random.randrange(0, 3)
-        if (choice == 1 or choice == 2) and (
-            isinstance(self.LHS_concept, AtomicConcept)
-            or isinstance(self.RHS_concept, AtomicConcept)
-        ):
-            if isinstance(self.LHS_concept, AtomicConcept):
-                if choice == 1:
-                    LHS_representation = f"All {self.LHS_concept.nl()} people"
-                else:
-                    LHS_representation = f"{self.LHS_concept.nl().capitalize()} people"
-            elif isinstance(self.LHS_concept, RestrictionConcept):
-                if choice == 1:
-                    LHS_representation = (
-                        f"All people that {pluralize(self.LHS_concept.nl())}"
-                    )
-                else:
-                    LHS_representation = (
-                        f"People that {pluralize(self.LHS_concept.nl())}"
-                    )
-            elif isinstance(self.LHS_concept, JunctionConcept):
-                if choice == 1:
-                    if self.LHS_concept.has_atomic:
-                        LHS_representation = (
-                            f"All people that are {self.LHS_concept.nl('they')}"
-                        )
-                    else:
-                        LHS_representation = (
-                            f"All people that {self.LHS_concept.nl('they')}"
-                        )
-                else:
-                    if self.LHS_concept.has_atomic:
-                        LHS_representation = (
-                            f"People that are {self.LHS_concept.nl('they')}"
-                        )
-                    else:
-                        LHS_representation = (
-                            f"People that {self.LHS_concept.nl('they')}"
-                        )
-
-            if isinstance(self.RHS_concept, AtomicConcept):
-                RHS_representation = f"are {self.RHS_concept.nl()}"
-            elif isinstance(self.RHS_concept, RestrictionConcept):
-                RHS_representation = f"{pluralize(self.RHS_concept.nl())}"
-            elif isinstance(self.RHS_concept, JunctionConcept):
-                if self.RHS_concept.has_atomic:
-                    RHS_representation = f"are {self.RHS_concept.nl(pronoun='they')}"
-                else:
-                    RHS_representation = (
-                        f"{pluralize(self.RHS_concept.nl(pronoun='they'))}"
-                    )
-
-            return f"{LHS_representation} {RHS_representation}"
-
-        rhs_pronoun_no_verb = rhs_pronoun.split()[0]
-
-        # CASE: if something is blue and red, then it is nothing ->
-        # will be: if something is blue, then it cannot be red.
-        # This case happens only when LHS is conjunction as if it was disjunction and the RHS would be nothing,
-        # then the ontology would be inconsistent!
-
-        if (
+    def is_conjunction_subclass_bottom(self):
+        """
+        Checks whether the TBox axiom of the form: ( Concept ) ⊓ ( Concept ) ⊑ ( + ⊥ ).
+        """
+        return (
             isinstance(self.RHS_concept, AtomicConcept)
             and self.RHS_concept.concept_name == "⊥"
             and self.RHS_concept.polarity == "+"
             and isinstance(self.LHS_concept, JunctionConcept)
             and self.LHS_concept.relationship == "⊓"
-        ):
-            if isinstance(self.LHS_concept.lhs_concept, RestrictionConcept):
-                if self.LHS_concept.lhs_concept.restriction == "∃":  # existential
-                    concept_nl = f"If {self.LHS_concept.lhs_concept.nl()}, then {rhs_pronoun_no_verb} cannot be {self.LHS_concept.rhs_concept.nl()}"
-                else:  # universal or quantification
-                    concept_nl = f"If {lhs_pronoun} {self.LHS_concept.lhs_concept.nl()}, then {rhs_pronoun_no_verb} cannot {self.LHS_concept.rhs_concept.nl()}"
-            else:  # conjunction of two atomic concepts
-                concept_nl = f"If {lhs_pronoun} {self.LHS_concept.lhs_concept.nl()}, then {rhs_pronoun_no_verb} cannot be {self.LHS_concept.rhs_concept.nl()}"
-        else:
-            LHS_junction = isinstance(self.LHS_concept, JunctionConcept)
-            LHS_restriction = isinstance(self.LHS_concept, RestrictionConcept)
+        )
 
-            if LHS_junction:
-                LHS_nl = self.LHS_concept.nl()
+    def handle_special_axiom(self):
+        # Someone can like only things that are blue and they chase someone red
+        axiom_nl = f"Someone can {pluralize(self.RHS_concept.nl())}"
+        return axiom_nl
+
+    def format_lhs_representation(self, choice):
+        if isinstance(self.LHS_concept, AtomicConcept):
+            if choice == 1:
+                LHS_representation = f"All {self.LHS_concept.nl()} people"
             else:
-                LHS_nl = self.LHS_concept.nl()
-
-            if LHS_restriction or (LHS_junction and not self.LHS_concept.has_atomic):
-                LHS_representation = f"{lhs_pronoun} {LHS_nl}"
+                LHS_representation = f"{self.LHS_concept.nl().capitalize()} people"
+        elif isinstance(self.LHS_concept, RestrictionConcept):
+            if choice == 1:
+                LHS_representation = (
+                    f"All people that {pluralize(self.LHS_concept.nl())}"
+                )
             else:
-                LHS_representation = f"{lhs_pronoun} is {LHS_nl}"
-
-            RHS_junction = isinstance(self.RHS_concept, JunctionConcept)
-            RHS_restriction = isinstance(self.RHS_concept, RestrictionConcept)
-
-            if RHS_junction and (rhs_pronoun_no_verb == "they"):
-                RHS_nl = self.RHS_concept.nl(pronoun=rhs_pronoun_no_verb)
+                LHS_representation = f"People that {pluralize(self.LHS_concept.nl())}"
+        elif isinstance(self.LHS_concept, JunctionConcept):
+            if choice == 1:
+                if self.LHS_concept.has_atomic:
+                    LHS_representation = (
+                        f"All people that are {self.LHS_concept.nl('they')}"
+                    )
+                else:
+                    LHS_representation = (
+                        f"All people that {self.LHS_concept.nl('they')}"
+                    )
             else:
-                RHS_nl = self.RHS_concept.nl()
+                if self.LHS_concept.has_atomic:
+                    LHS_representation = (
+                        f"People that are {self.LHS_concept.nl('they')}"
+                    )
+                else:
+                    LHS_representation = f"People that {self.LHS_concept.nl('they')}"
+        return LHS_representation
 
-            if rhs_pronoun_no_verb == "they":
-                if RHS_nl.split()[0][-2:] in {"es", "ts"}:
-                    RHS_nl = pluralize(RHS_nl)
-
-            if RHS_restriction or (RHS_junction and not self.RHS_concept.has_atomic):
-                RHS_representation = f"{rhs_pronoun_no_verb} {RHS_nl}"
+    def format_rhs_representation(self):
+        if isinstance(self.RHS_concept, AtomicConcept):
+            RHS_representation = f"are {self.RHS_concept.nl()}"
+        elif isinstance(self.RHS_concept, RestrictionConcept):
+            RHS_representation = f"{pluralize(self.RHS_concept.nl())}"
+        elif isinstance(self.RHS_concept, JunctionConcept):
+            if self.RHS_concept.has_atomic:
+                RHS_representation = f"are {self.RHS_concept.nl(pronoun='they')}"
             else:
-                RHS_representation = f"{rhs_pronoun} {RHS_nl}"
+                RHS_representation = f"{pluralize(self.RHS_concept.nl(pronoun='they'))}"
+        return RHS_representation
 
-            concept_nl = f"If {LHS_representation}, then {RHS_representation}"
-
+    def handle_conjunction_subclass_bottom_case(self):
+        if isinstance(self.LHS_concept.lhs_concept, RestrictionConcept):
+            if self.LHS_concept.lhs_concept.restriction == "∃":  # existential
+                concept_nl = f"If {self.LHS_concept.lhs_concept.nl()}, then they cannot be {self.LHS_concept.rhs_concept.nl()}"
+            else:  # universal or quantification
+                concept_nl = f"If someone {self.LHS_concept.lhs_concept.nl()}, then they cannot {self.LHS_concept.rhs_concept.nl()}"
+        else:  # conjunction of two atomic concepts
+            concept_nl = f"If someone {self.LHS_concept.lhs_concept.nl()}, then they cannot be {self.LHS_concept.rhs_concept.nl()}"
         return concept_nl
+
+    def format_lhs_concept(self):
+        LHS_is_junction = isinstance(self.LHS_concept, JunctionConcept)
+        LHS_is_restriction = isinstance(self.LHS_concept, RestrictionConcept)
+
+        LHS_nl = self.LHS_concept.nl()
+
+        if LHS_is_restriction or (LHS_is_junction and not self.LHS_concept.has_atomic):
+            LHS_representation = f"someone {LHS_nl}"
+        else:
+            LHS_representation = f"someone is {LHS_nl}"
+
+        return LHS_representation
+
+    def format_rhs_concept(self):
+        RHS_is_junction = isinstance(self.RHS_concept, JunctionConcept)
+        RHS_is_restriction = isinstance(self.RHS_concept, RestrictionConcept)
+
+        RHS_nl = (
+            self.RHS_concept.nl(pronoun="they")
+            if RHS_is_junction
+            else self.RHS_concept.nl()
+        )
+
+        RHS_nl = pluralize(RHS_nl)
+
+        if RHS_is_restriction or (RHS_is_junction and not self.RHS_concept.has_atomic):
+            RHS_representation = f"they {RHS_nl}"
+        else:
+            RHS_representation = f"they are {RHS_nl}"
+
+        return RHS_representation
+
+    def format_default_case(self, LHS_representation, RHS_representation):
+        return f"If {LHS_representation}, then {RHS_representation}"
+
+    def nl(self):
+        LHS_representation = str()
+        RHS_representation = str()
+
+        if self.is_special_axiom():
+            return self.handle_special_axiom()
+
+        choice = random.randrange(0, 3)  # 0.33 probability for each template
+        if (choice == 1 or choice == 2) and (
+            isinstance(self.LHS_concept, AtomicConcept)
+            or isinstance(self.RHS_concept, AtomicConcept)
+        ):
+            LHS_representation = self.format_lhs_representation(choice)
+            RHS_representation = self.format_rhs_representation()
+            return f"{LHS_representation} {RHS_representation}"
+
+        if self.is_conjunction_subclass_bottom():
+            return self.handle_conjunction_subclass_bottom_case()
+
+        # Default template case
+        LHS_representation = self.format_lhs_concept()
+        RHS_representation = self.format_rhs_concept()
+
+        return self.format_default_case(LHS_representation, RHS_representation)
 
 
 class DifferentIndividualsAssertion:
@@ -698,38 +703,6 @@ class TheoryAssertionInstance:
             "json_class": "TheoryAssertionInstance",
             "theory": self.theory.to_json(),
             "questions": self.questions,
-        }
-
-
-class DescriptionLogicsForm:
-    def __init__(self, theory_statements_in_DL, question_statements_in_DL):
-        self.theory_statements_in_DL = theory_statements_in_DL
-        self.question_statements_in_DL = question_statements_in_DL
-
-    def __hash__(self):
-        return hash(
-            (tuple(self.theory_statements_in_DL), self.question_statements_in_DL)
-        )
-
-    def __eq__(self, other):
-        return (
-            isinstance(other, DescriptionLogicsForm)
-            and set(self.theory_statements_in_DL) == set(other.theory_statements_in_DL)
-            and self.question_statements_in_DL == other.question_statements_in_DL
-        )
-
-    @classmethod
-    def from_json(cls, json_dict):
-        json_class = json_dict.get("json_class")
-        if json_class == "DescriptionLogicsForm":
-            return DescriptionLogicsForm(json_dict["theory"], json_dict["questions"])
-        return None
-
-    def to_json(self):
-        return {
-            "json_class": "DescriptionLogicsForm",
-            "theory": self.theory_statements_in_DL,
-            "questions": self.question_statements_in_DL,
         }
 
 
