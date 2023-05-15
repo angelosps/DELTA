@@ -1,6 +1,7 @@
 import argparse
 import json
 import openai
+from sentence_transformers import SentenceTransformer, util
 
 openai.api_key = "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"
 
@@ -20,9 +21,8 @@ def paraphrase(sentence):
     return output
 
 
-from sentence_transformers import SentenceTransformer, util
-
 model = SentenceTransformer("paraphrase-distilroberta-base-v1")
+# model = SentenceTransformer("sentence-transformers/paraphrase-distilroberta-base-v1")
 
 
 def calculate_similarity(sentence1, sentence2):
@@ -36,14 +36,17 @@ def main():
     parser.add_argument(
         "--input-file", required=True, help="Path to dataset JSONL file."
     )
+    parser.add_argument(
+        "--output-file", required=True, help="Path to dataset JSONL file."
+    )
     args = parser.parse_args()
     input_file = args.input_file
-    output_file = f"{args.input_file.split('.')[0]}_para.jsonl"
+    output_file = args.output_file
 
     print(f"I got '{args.input_file}' and I will produce '{output_file}'")
-    threshold = 0.8
+    threshold = 0.85
     with open(input_file, "r") as infile, open(output_file, "w") as outfile:
-        for line in list(infile)[:100]:
+        for line in list(infile):
             data = json.loads(line)
             rephrased_context = []
             for sentence in data["context"]:
@@ -78,8 +81,12 @@ def main():
                     question["text"] = rephrased_text
                 rephrased_questions.append(question)
 
-            data["context"] = rephrased_context
-            data["questions"] = rephrased_questions
+            # data["context"] = rephrased_context
+            # data["questions"] = rephrased_questions
+            data["paraphrased"] = {
+                "context": rephrased_context,
+                "questions": rephrased_questions,
+            }
 
             outfile.write(json.dumps(data) + "\n")
 

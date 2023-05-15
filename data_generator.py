@@ -492,9 +492,10 @@ def generate_theory(grammar, config, theory_op_file, num_of_examples, max_depth)
             dump(example.to_json(), theory_op_file, ensure_ascii=False)
             theory_op_file.write("\n")
 
-            ## Delete .owl files ##
+            # Delete .owl files
             remove("ALCQCC.owl")
             remove("ALCQ_ontology.owl")
+
             curr_num_examples += 1
             progress_tracker.update()
 

@@ -1,7 +1,7 @@
 import argparse
 import json
-from random import shuffle
 import language_tool_python
+from tqdm import tqdm
 
 tool = language_tool_python.LanguageTool("en-US")
 is_bad_rule = (
@@ -10,6 +10,7 @@ is_bad_rule = (
     or rule.message == "Possible spelling mistake found."
     or rule.ruleId == "COLD_COULD"
     or rule.ruleId == "COMMA_COMPOUND_SENTENCE"
+    or rule.ruleId == "COMMA_COMPOUND_SENTENCE_2"
     or rule.ruleId == "ADVERB_VERB_ADVERB_REPETITION"
     or rule.ruleId == "PHRASE_REPETITION"
 )
@@ -22,9 +23,8 @@ def correct_sentence(text):
     corrected_text = language_tool_python.utils.correct(text, matches)
     if len(matches) != 0:
         for m in matches:
-            if m.ruleId != "NON3PRS_VERB" and m.ruleId != "COMMA_COMPOUND_SENTENCE_2":
+            if m.ruleId != "NON3PRS_VERB":
                 print(m)
-        # print("\n\n")
     return corrected_text
 
 
@@ -34,6 +34,8 @@ def fix_numbering_and_shuffle(input_file, output_file):
     f.close()
     id = 1
     with open(output_file, mode="w") as fout:
+        progress_tracker = tqdm(total=len(json_lines))
+        progress_tracker.set_description(desc="Correcting data...")
         for line in json_lines:
             skip = False
             data = json.loads(line)
@@ -61,6 +63,7 @@ def fix_numbering_and_shuffle(input_file, output_file):
                     new_sentence = corr_sentence
                 new_context.append(new_sentence)
             new_questions = list()
+            qID = 1
             for question in data["questions"]:
                 if "  " in question["text"]:
                     skip = True
@@ -84,7 +87,7 @@ def fix_numbering_and_shuffle(input_file, output_file):
                     new_question_text = corr_question
 
                 new_question = {
-                    "id": question["id"],
+                    "id": qID,
                     "text": new_question_text,
                     "label": question["label"],
                     "depth": question["depth"],
@@ -94,20 +97,29 @@ def fix_numbering_and_shuffle(input_file, output_file):
                     "meta": question["meta"],
                 }
                 new_questions.append(new_question)
+                qID += 1
+
+            assert len(data["questions"]) == qID - 1
+
             if skip:
-                print("Skipping theory ..")
+                print("Invalid example, skipping ..")
                 continue
-            shuffle(new_context)  # Shuffle context statements
+
             data2dump = {
                 "id": new_id,
                 "context": new_context,
                 "questions": new_questions,
                 "context_logical_form": data["context_logical_form"],
             }
+
             json_object = json.dumps(data2dump, ensure_ascii=False)
             fout.write(json_object)
             fout.write("\n")
             id += 1
+
+            progress_tracker.update()
+
+    progress_tracker.close()
     fout.close()
     tool.close()
 
@@ -117,14 +129,16 @@ def main():
     parser.add_argument(
         "--input-file", required=True, help="Path to dataset JSONL file."
     )
+    parser.add_argument(
+        "--output-file", required=True, help="Path to save the result JSONL file."
+    )
     args = parser.parse_args()
     input_file = args.input_file
-    output_file = f"{args.input_file.split('.')[0]}_fix.jsonl"
+    output_file = args.output_file
 
     print(f"I got '{args.input_file}' and I will produce '{output_file}'")
 
     ## Fix numbering in sentences --> Use words instead of numbers (1->"one", ..) ##
-    ## Also shuffle context statements ##
     fix_numbering_and_shuffle(input_file, output_file)
 
 
