@@ -188,7 +188,7 @@ def process_ontology_and_inferred_axioms(
     try:
         # Set up the signal handler
         signal.signal(signal.SIGALRM, handler)
-        signal.alarm(1)  # Set a 1-second timeout
+        signal.alarm(2)  # Set a 1-second timeout
         if create_ontology(example_id, generated_abox, generated_tbox) == False:
             print("Couldn't create ontology.")
             return None, None
@@ -211,8 +211,9 @@ def process_ontology_and_inferred_axioms(
         preexec_fn=setsid,
     ) as process:
         try:
-            owlapi_output = process.communicate(timeout=5)[0]
+            owlapi_output = process.communicate(timeout=4.5)[0]
         except TimeoutExpired:
+            # print("Timeout in Explainer!")
             killpg(process.pid, SIGTERM)
             return None, None
 

@@ -289,7 +289,7 @@ def is_unknown(random_unknown_axiom, all_statements_NL):
         preexec_fn=setsid,
     ) as process:
         try:
-            owlapi_output = process.communicate(timeout=1.5)[0]
+            owlapi_output = process.communicate(timeout=3)[0]
         except TimeoutExpired:
             killpg(process.pid, SIGTERM)
             return False
