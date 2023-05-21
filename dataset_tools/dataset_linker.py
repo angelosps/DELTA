@@ -8,16 +8,12 @@ def main():
     parser.add_argument(
         "--i2", required=True, help="Path to second dataset JSONL file."
     )
-
+    parser.add_argument(
+        "--output-file", required=True, help="Path to output dataset JSONL file."
+    )
     args = parser.parse_args()
 
-    suffix_offset = len(".jsonl")
-    sum = int(args.i1.split("-")[-1][:-suffix_offset]) + int(
-        args.i2.split("-")[-1][:-suffix_offset]
-    )
-
-    splitted_path = args.i1.split("-")
-    out_file_path = f"{'-'.join(splitted_path[:-1])}-{sum}.jsonl"
+    out_file_path = args.output_file
 
     with open(args.i1, "r") as in_file1:
         json_list1 = list(in_file1)
@@ -39,7 +35,7 @@ def main():
                 if (
                     question["depth"] == 0
                     and question["label"] == "True"
-                    and question["text"] not in context
+                    and f"{question['text']}." not in context
                 ):
                     # Check that the true lookup questions are present in the context
                     print(
@@ -47,7 +43,8 @@ def main():
                     )
                     continue
                 elif (
-                    question["depth"] > 1
+                    question["depth"] == "na"
+                    or question["depth"] > 1
                     or (question["depth"] == 0 and question["label"] != "True")
                 ) and question["text"] in context:
                     print(
@@ -83,7 +80,7 @@ def main():
                 if (
                     question["depth"] == 0
                     and question["label"] == "True"
-                    and question["text"] not in context
+                    and f"{question['text']}." not in context
                 ):
                     # Check that the true lookup questions are present in the context
                     print(
@@ -91,7 +88,8 @@ def main():
                     )
                     continue
                 elif (
-                    question["depth"] > 1
+                    question["depth"] == "na"
+                    or question["depth"] > 1
                     or (question["depth"] == 0 and question["label"] != "True")
                 ) and question["text"] in context:
                     print(
