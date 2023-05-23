@@ -1,8 +1,8 @@
 # DELTA: Description Logics with Transformers
 
-Code to produce ALCQ-based Knowledge Bases (KBs) in natural language. Code for paraphrasing the NL representation of KBs using GPT-3 it is included.
+Code to produce ALCQ-based Knowledge Bases (KBs) in natural language. 
 
-# Knowledge Base generation
+## Knowledge Base generation
 
 Given an `ALCQ Probabilistic Context Free Grammar (PCFG)` the `data_generator.py` will produce `num_of_examples` KBs with questions within the target reasoning depth (`max_depth`).
 
