@@ -34,4 +34,4 @@ Where:
 
 ## Contact
 
-If you encounter any problems or have questions about DELTA, please feel free to contact me at `reverse("angelos") + "ps" + "[at]gmail.com"`.
+If you encounter any problems or have questions about DELTA, please feel free to contact me at `reverse("angelos") + "ps" + [at]"gmail.com"`.
