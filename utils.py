@@ -495,7 +495,7 @@ def opposite_polarity(polarity: str) -> str:
 
 def opposite_connective(connective: str) -> str:
     """
-    Returns the opposite logical connective.
+    Returns the opposite logical connective..
     """
     return "⊔" if connective == "⊓" else "⊔"
 
