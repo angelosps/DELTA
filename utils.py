@@ -497,7 +497,7 @@ def opposite_connective(connective: str) -> str:
     """
     Returns the opposite logical connective..
     """
-    return "⊔" if connective == "⊓" else "⊔"
+    return "⊔" if connective == "⊓" else "⊓"
 
 
 def opposite_restriction(restriction: str) -> str:
