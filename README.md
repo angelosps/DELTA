@@ -1,7 +1,16 @@
 # DELTA: Description Logics with Transformers
 
-Code to produce ALCQ-based Knowledge Bases (KBs) in natural language. 
+Code to produce ALCQ-based knowledge bases as described in our paper: [Reasoning over Description Logic-based Contexts with Transformers](https://arxiv.org/pdf/2311.08941.pdf).
 
+If you use our code/dataset in your work please cite our paper:
+```
+@article{poulis2023reasoning,
+  title={Reasoning over Description Logic-based Contexts with Transformers},
+  author={Poulis, Angelos and Tsalapati, Eleni and Koubarakis, Manolis},
+  journal={arXiv preprint arXiv:2311.08941},
+  year={2023}
+}
+```
 ## Knowledge Base generation
 
 Given an `ALCQ Probabilistic Context Free Grammar (PCFG)` the `data_generator.py` will produce `num_of_examples` KBs with questions within the target reasoning depth (`max_depth`).
