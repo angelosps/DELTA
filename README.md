@@ -1,16 +1,19 @@
 # DELTA: Description Logics with Transformers
 
-<!--- Code to produce ALCQ-based knowledge bases as described in our paper: [Reasoning over Description Logic-based Contexts with Transformers](https://arxiv.org/pdf/2311.08941.pdf).
+Code to produce ALCQ-based knowledge bases as described in our paper: [Transformers in the Service of Description Logic-based Contexts](https://arxiv.org/pdf/2311.08941).
 
 If you use our code/dataset in your work please cite our paper:
 ```
-@article{poulis2023reasoning,
-  title={Reasoning over Description Logic-based Contexts with Transformers},
-  author={Poulis, Angelos and Tsalapati, Eleni and Koubarakis, Manolis},
-  journal={arXiv preprint arXiv:2311.08941},
-  year={2023}
+@misc{poulis2024transformers,
+      title={Transformers in the Service of Description Logic-based Contexts}, 
+      author={Angelos Poulis and Eleni Tsalapati and Manolis Koubarakis},
+      year={2024},
+      eprint={2311.08941},
+      archivePrefix={arXiv},
+      primaryClass={cs.CL}
 }
-``` --->
+```
+
 ## Knowledge Base generation
 
 Given an `ALCQ Probabilistic Context Free Grammar (PCFG)` the `data_generator.py` will produce `num_of_examples` KBs with questions within the target reasoning depth (`max_depth`).
@@ -41,6 +44,6 @@ Where:
 * `<output-file>` is the name of the JSONL file to output the generated data.
 
 
-<!--- ## Contact
+## Contact
 
-If you encounter any problems or have questions about DELTA, please feel free to contact me at `reverse("angelos") + "ps" + [at]"gmail.com"`. --->
+If you encounter any problems or have questions about DELTA, please feel free to contact me at `reverse("angelos") + "ps" + [at]"gmail.com"`.
