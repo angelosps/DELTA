@@ -1,7 +1,7 @@
 # DELTA: Description Logics with Transformers
 
 Code to produce ALCQ-based knowledge bases as described in our paper: [Transformers in the Service of Description Logic-based Contexts](https://arxiv.org/pdf/2311.08941).
-
+You can find the model DELTA<sub>M</sub> that is trained on our dataset DELTA<sub>D</sub> in [huggingface](https://huggingface.co/angelosps/delta_m).  
 If you use our code/dataset in your work please cite our paper:
 ```
 @misc{poulis2024transformers,
