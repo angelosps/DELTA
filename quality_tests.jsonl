@@ -1,0 +1,32 @@
+{"context": "Anne is red and green.", "question": "Anne is red.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "Anne is red and green.", "question": "Anne is green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "Anne is red. Anne is green.", "question": "Anne is red and green.", "correct_answer": "True", "delta_m_answer": "Unknown"}
+{"context": "If someone is blue, then they are red and green.", "question": "If someone is blue, then they are red.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "If someone is blue, then they are red and green.", "question": "If someone is blue, then they are green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "If someone is blue, then they are red. If someone is blue, then they are green.", "question": "If someone is blue, then they are red and green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "If someone is blue, then they are red and green.", "question": "If someone is blue, then they are red or green.", "correct_answer": "True", "delta_m_answer": "Unknown"}
+{"context": "Anne is red. Anne is green.", "question": "Anne is red or green.", "correct_answer": "True", "delta_m_answer": "Unknown"}
+{"context": "Anne is red and green.", "question": "Anne is red or green.", "correct_answer": "True", "delta_m_answer": "Unknown"}
+{"context": "Anne is red and green.", "question": "Anne is green or red.", "correct_answer": "True", "delta_m_answer": "Unknown"}
+{"context": "Anne is red or green.", "question": "Anne is green or red.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "If someone is blue or red then they are green.", "question": "If someone is blue, then they are green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "If someone is blue or red then they are green.", "question": "If someone is red, then they are green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "If someone is blue, then they are green. If someone is red, then they are green.", "question": "If someone is blue or red, then they are green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "If someone is blue, then they are green. If someone is red, then they are green.", "question": "If someone is blue and red, then they are green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "People that eat someone red or green, are blue.", "question": "People that eat someone red or eat someone green, are blue.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "People that eat someone red or green, are blue.", "question": "People that eat someone red or green, they eat someone red or eat someone green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "People that eat someone red or green, are blue.", "question": "People that eat someone that is red or eat someone that is green they eat someone that is red or green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "Blue people eat someone red or green.", "question": "People that are blue they eat someone that is red or they eat someone that is green.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "People that eat only people that are red or green are blue.", "question": "People that eat only people that are red or eat only people that are green, are blue.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "People that eat something are blue. Anne eats Bob. Bob is green.", "question": "Anne is blue.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "People that eat something are blue. Anne eats Bob. Bob is green.", "question": "Anne is green.", "correct_answer": "Unknown", "delta_m_answer": "Unknown"}
+{"context": "People that eat something are blue. Anne eats Bob. Bob is green. If someone is blue, then they are not green.", "question": "Anne is blue.", "correct_answer": "True", "delta_m_answer": "True"}
+{"context": "People that eat something are blue. Anne eats Bob. Bob is green. If someone is blue, then they are not green.", "question": "Anne is green.", "correct_answer": "False", "delta_m_answer": "False"}
+{"context": "Someone can like only people that are nice. Bob is not nice.", "question": "Anne likes Bob.", "correct_answer": "False", "delta_m_answer": "Unknown"}
+{"context": "Someone can like only people that are nice. Bob is nice.", "question": "Anne likes Bob.", "correct_answer": "Unknown", "delta_m_answer": "Unknown"}
+{"context": "Anne likes less than two people. Anne likes Bob. Anne likes John.", "question": "Anne likes Alice.", "correct_answer": "False", "delta_m_answer": "Unknown"}
+{"context": "Anne likes Bob.", "question": "Anne likes none.", "correct_answer": "False", "delta_m_answer": "False"}
+{"context": "Anne likes Bob. Anne likes John. Anne likes Alice.", "question": "Anne likes more than two people.", "correct_answer": "True", "delta_m_answer": "Unknown"}
+{"context": "Anne likes Bob. Anne likes John. Anne likes Alice.", "question": "Anne likes more than four people.", "correct_answer": "Unknown", "delta_m_answer": "Unknown"}
+{"context": "Anne likes Bob. Anne likes John. Anne likes Alice.", "question": "Anne does not like less than two people.", "correct_answer": "True", "delta_m_answer": "Unknown"}
+{"context": "Anne likes Bob.", "question": "Anne does not like Bob.", "correct_answer": "False", "delta_m_answer": "False"}
